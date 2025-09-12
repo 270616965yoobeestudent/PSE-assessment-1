@@ -1,0 +1,3 @@
+argparse
+sqlite3
+threading
