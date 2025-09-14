@@ -3,15 +3,10 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import List, Optional
 
-from cgps.core.models.db_model import (
-    DBModel,
-    to_bool,
-    to_date,
-    to_decimal,
-    to_dt,
-)
+from cgps.core.models.db_model import DBModel
 from cgps.core.models.tracking import Tracking
 from cgps.core.models.tracking_device import TrackingDevice
+from cgps.core.utils import to_bool, to_date, to_decimal, to_dt
 
 
 @dataclass

@@ -18,6 +18,3 @@ class AdminAuthService(AuthService):
             password_salt=password_salt,
             jwt_secret_key=jwt_secret_key,
         )
-
-
-

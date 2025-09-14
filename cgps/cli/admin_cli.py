@@ -1,6 +1,6 @@
 from argparse import _SubParsersAction, ArgumentParser
 from cgps.cli.user_cli import UserCli
-from cgps.core.services.admin.admin_auth_service import AdminAuthService
+from cgps.core.services.admin_auth_service import AdminAuthService
 from cgps.ui.login_ui import LoginUi
 
 

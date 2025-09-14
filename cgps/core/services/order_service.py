@@ -1,11 +1,11 @@
 from cgps.core.database import Database
 from cgps.core.models.car import Car
-from cgps.core.models.db_model import _strip_prefix
 from cgps.core.models.invoice import Invoice
 from cgps.core.models.order import Order
+from cgps.core.utils import strip_prefix
 
 
-class CustomerOrderService:
+class OrderService:
     def __init__(self, database: Database):
         self._database = database
 
@@ -46,11 +46,11 @@ class CustomerOrderService:
             (customer_id,),
         )
         invoices: list[Invoice] = []
-        for row in rows:           
-            car_data = _strip_prefix(row, "car__")
-            order: Order = Order.from_row(row)  
+        for row in rows:
+            car_data = strip_prefix(row, "car__")
+            order: Order = Order.from_row(row)
             order.car = Car.from_row(car_data)
-            invoice_data = _strip_prefix(row, "invoice__")
+            invoice_data = strip_prefix(row, "invoice__")
             invoice: Invoice = Invoice.from_row(invoice_data)
             invoice.order = order
             invoices.append(invoice)

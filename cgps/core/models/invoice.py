@@ -5,7 +5,8 @@ from typing import Optional
 
 from sympy import Order
 
-from cgps.core.models.db_model import DBModel, to_decimal, to_dt
+from cgps.core.models.db_model import DBModel
+from cgps.core.utils import to_decimal, to_dt
 
 
 @dataclass

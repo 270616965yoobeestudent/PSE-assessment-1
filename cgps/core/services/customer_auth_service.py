@@ -1,9 +1,8 @@
 from datetime import datetime
-from typing import Any, Dict
 from cgps.core.database import Database
 from cgps.core.models.customer import Customer
-from cgps.core.models.db_model import ISO_DT, only_keys
 from cgps.core.services.auth_service import AuthService
+from cgps.core.utils import ISO_DT, only_keys
 
 
 class CustomerAuthService(AuthService):
@@ -24,21 +23,21 @@ class CustomerAuthService(AuthService):
         )
 
     def _verify_driver_license_existing(self, no):
-        data = self.database.fetchone(
+        data = self._database.fetchone(
             f"SELECT no FROM driver_licenses WHERE no = ?",
             (no,),
         )
         return data is not None
 
     def _verify_passport_existing(self, no):
-        data = self.database.fetchone(
+        data = self._database.fetchone(
             f"SELECT no FROM passports WHERE no = ?",
             (no,),
         )
         return data is not None
 
     def _verify_username_existing(self, username):
-        data = self.database.fetchone(
+        data = self._database.fetchone(
             f"SELECT username FROM customers WHERE username = ?",
             (username,),
         )
@@ -54,23 +53,37 @@ class CustomerAuthService(AuthService):
 
         now = datetime.now().strftime(ISO_DT)
 
-        self.database.begin()
+        self._database.begin()
         passport_data = data.passport.to_db()
         passport_data = only_keys(
             passport_data,
-            ["no", "country_code", "gender", "first_name", "last_name", "expired_at",],
+            [
+                "no",
+                "country_code",
+                "gender",
+                "first_name",
+                "last_name",
+                "expired_at",
+            ],
         )
         passport_data.update(created_at=now, updated_at=now)
         passport_cols = list(passport_data.keys())
         passport_sql = f"INSERT INTO passports ({','.join(passport_cols)}) VALUES ({','.join(':'+c for c in passport_cols)})"
-        passport_id = self.database.execute(passport_sql, passport_data)
+        passport_id = self._database.execute(passport_sql, passport_data)
 
         license_data = data.driver_license.to_db()
-        license_data = only_keys(license_data, ["no", "country_code", "expired_at",])
+        license_data = only_keys(
+            license_data,
+            [
+                "no",
+                "country_code",
+                "expired_at",
+            ],
+        )
         license_data.update(created_at=now, updated_at=now)
         license_cols = list(license_data.keys())
         license_sql = f"INSERT INTO driver_licenses ({','.join(license_cols)}) VALUES ({','.join(':'+c for c in license_cols)})"
-        license_id = self.database.execute(license_sql, license_data)
+        license_id = self._database.execute(license_sql, license_data)
 
         customer_data = data.to_db()
         customer_data.update(
@@ -97,6 +110,6 @@ class CustomerAuthService(AuthService):
         )
         customer_cols = list(customer_data.keys())
         customer_sql = f"INSERT INTO customers ({','.join(customer_cols)}) VALUES ({','.join(':'+c for c in customer_cols)})"
-        self.database.execute(customer_sql, customer_data)
-        self.database.commit()
+        self._database.execute(customer_sql, customer_data)
+        self._database.commit()
         return True

@@ -4,36 +4,39 @@ from cgps.cli.guards.guest_guard import guest
 from cgps.cli.guards.login_guard import logged_in
 from cgps.cli.user_cli import UserCli
 from cgps.core.models.invoice import Invoice
-from cgps.core.services.customer.customer_auth_service import CustomerAuthService
-from cgps.core.services.customer.customer_car_service import CustomerCarService
-from cgps.core.services.customer.customer_info_service import CustomerInfoService
-from cgps.core.services.customer.customer_order_service import CustomerOrderService
+from cgps.core.services.customer_auth_service import CustomerAuthService
+from cgps.core.services.car_service import CarService
+from cgps.core.services.customer_service import CustomerService
+from cgps.core.services.order_service import OrderService
 from cgps.ui.info_form_ui import InfoFormUi
 from cgps.ui.register_ui import RegisterUi
 from cgps.ui.info_ui import InfoUi
 from cgps.ui.login_ui import LoginUi
 from cgps.ui.order_list_ui import OrderListUi
+from cgps.ui.rent_ui import RentUi
 
 
 class CustomerCli(UserCli):
     def __init__(
         self,
         auth_service: CustomerAuthService,
-        info_service: CustomerInfoService,
-        order_service: CustomerOrderService,
-        car_service: CustomerCarService, 
+        customer_service: CustomerService,
+        order_service: OrderService,
+        car_service: CarService, 
         login_ui: LoginUi,
         register_ui: RegisterUi,
         info_form_ui: InfoFormUi,
         info_ui: InfoUi,
         order_list_ui: OrderListUi,
+        rent_ui: RentUi,
     ):
         super().__init__(auth_service, login_ui)
         self._register_ui = register_ui
         self._info_ui = info_ui
         self._info_form_ui = info_form_ui
         self._order_list_ui = order_list_ui
-        self._info_service = info_service
+        self._rent_ui = rent_ui
+        self._customer_service = customer_service
         self._order_service = order_service
         self._car_service = car_service
 
@@ -98,13 +101,13 @@ class CustomerCli(UserCli):
         result = self._info_form_ui.with_data(data).run()
         if result is None:
             return
-        if not self._info_service.update_info(result):
+        if not self._customer_service.update_info(result):
             print("Update info failed")
             return
         print("Update info successful")
 
     def _get_info(self, user_id: int) -> Mapping[str, Any]:
-        info = self._info_service.get_info(user_id)
+        info = self._customer_service.get_info(user_id)
         passport = info.passport
         license = info.driver_license
         info_data = info.to_db()

@@ -5,8 +5,8 @@ from typing import Optional
 
 from cgps.core.models.car import Car
 from cgps.core.models.customer import Customer
-from cgps.core.models.db_model import DBModel, to_decimal, to_dt
-from cgps.core.models.invoice import Invoice
+from cgps.core.models.db_model import DBModel
+from cgps.core.utils import to_decimal, to_dt
 
 
 @dataclass

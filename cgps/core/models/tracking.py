@@ -2,7 +2,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
-from cgps.core.models.db_model import DBModel, to_bool, to_dt
+from cgps.core.models.db_model import DBModel
+from cgps.core.utils import to_bool, to_dt
 
 
 @dataclass

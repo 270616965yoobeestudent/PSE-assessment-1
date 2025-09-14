@@ -4,16 +4,17 @@ from cgps.cli.admin_cli import AdminCli
 from cgps.cli.app_cli import AppCli
 from cgps.cli.customer_cli import CustomerCli
 from cgps.core.database import Database
-from cgps.core.services.admin.admin_auth_service import AdminAuthService
-from cgps.core.services.customer.customer_auth_service import CustomerAuthService
-from cgps.core.services.customer.customer_car_service import CustomerCarService
-from cgps.core.services.customer.customer_info_service import CustomerInfoService
-from cgps.core.services.customer.customer_order_service import CustomerOrderService
+from cgps.core.services.admin_auth_service import AdminAuthService
+from cgps.core.services.customer_auth_service import CustomerAuthService
+from cgps.core.services.car_service import CarService
+from cgps.core.services.customer_service import CustomerService
+from cgps.core.services.order_service import OrderService
 from cgps.ui.info_form_ui import InfoFormUi
 from cgps.ui.register_ui import RegisterUi
 from cgps.ui.info_ui import InfoUi
 from cgps.ui.login_ui import LoginUi
 from cgps.ui.order_list_ui import OrderListUi
+from cgps.ui.rent_ui import RentUi
 
 
 class Container(containers.DeclarativeContainer):
@@ -39,16 +40,16 @@ class Container(containers.DeclarativeContainer):
         password_salt=config.customer.password_salt,
         jwt_secret_key=config.customer.jwt_secret_key,
     )
-    customer_info_service = providers.Factory(
-        CustomerInfoService,
+    customer_service = providers.Factory(
+        CustomerService,
         database=database,
     )
-    customer_order_service = providers.Factory(
-        CustomerOrderService,
+    order_service = providers.Factory(
+        OrderService,
         database=database,
     )
-    customer_car_service = providers.Factory(
-        CustomerCarService,
+    car_service = providers.Factory(
+        CarService,
         database=database,
     )
 
@@ -57,8 +58,9 @@ class Container(containers.DeclarativeContainer):
     login_ui = providers.Factory(LoginUi)
     info_ui = providers.Factory(InfoUi)
     register_ui = providers.Factory(RegisterUi)
-    customer_info_form_ui = providers.Factory(InfoFormUi)
+    info_form_ui = providers.Factory(InfoFormUi)
     order_list_ui = providers.Factory(OrderListUi)
+    rent_ui = providers.Factory(RentUi)
 
     # CLI Factory
     admin_cli = providers.Factory(
@@ -69,14 +71,15 @@ class Container(containers.DeclarativeContainer):
     customer_cli = providers.Factory(
         CustomerCli,
         auth_service=customer_auth_service,
-        info_service=customer_info_service,
-        order_service=customer_order_service,
-        car_service=customer_car_service,
+        customer_service=customer_service,
+        order_service=order_service,
+        car_service=car_service,
         login_ui=login_ui,
         register_ui=register_ui,
         info_ui=info_ui,
-        info_form_ui=customer_info_form_ui,
-        order_list_ui=order_list_ui
+        info_form_ui=info_form_ui,
+        order_list_ui=order_list_ui,
+        rent_ui=rent_ui,
     )
     app_cli = providers.Factory(
         AppCli,

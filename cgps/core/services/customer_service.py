@@ -1,12 +1,12 @@
 from datetime import datetime
 from cgps.core.database import Database
 from cgps.core.models.customer import Customer
-from cgps.core.models.db_model import ISO_DT, only_keys
 from cgps.core.models.driver_license import DriverLicense
 from cgps.core.models.passport import Passport
+from cgps.core.utils import ISO_DT, only_keys
 
 
-class CustomerInfoService:
+class CustomerService:
     def __init__(self, database: Database):
         self._database = database
 
@@ -23,14 +23,14 @@ class CustomerInfoService:
         )
         passport: Passport = Passport.from_row(passport_data)
         license: DriverLicense = DriverLicense.from_row(license_data)
-        customer.password = ''
+        customer.password = ""
         customer.passport = passport
         customer.driver_license = license
         return customer
 
     def update_info(self, customer: Customer) -> Customer:
         now = datetime.now().strftime(ISO_DT)
-    
+
         self._database.begin()
         passport_data = customer.passport.to_db()
         passport_data = only_keys(

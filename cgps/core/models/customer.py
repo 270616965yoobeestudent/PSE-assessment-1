@@ -2,9 +2,10 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Optional
 
-from cgps.core.models.db_model import DBModel, to_date, to_dt
+from cgps.core.models.db_model import DBModel
 from cgps.core.models.driver_license import DriverLicense
 from cgps.core.models.passport import Passport
+from cgps.core.utils import to_date, to_dt
 
 
 @dataclass
