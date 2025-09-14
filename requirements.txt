@@ -1,3 +1,7 @@
 argparse
-sqlite3
-threading
+dependency-injector==4.48.1
+keyring==25.6.0
+pyjwt==2.10.1
+textual==6.1.0
+textual-dev==1.7.0
+
