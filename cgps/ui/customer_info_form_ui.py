@@ -1,8 +1,9 @@
 from typing import Any
 from textual import on
 from textual.app import App, ComposeResult
-from textual.widgets import Input, Label, Select, Button
+from textual.widgets import Input, Label, Select, Button, MaskedInput
 from textual.events import Key
+from textual.containers import Horizontal
 
 from cgps.core.models.customer import Customer
 from cgps.core.models.passport import Passport
@@ -15,105 +16,152 @@ from cgps.ui.validators.require_validator import RequireValidator
 
 
 class CustomerInfoFormUi(App):
+    CSS = """
+    Label.header { color: white; text-style: bold; }
+    Label { color: grey; }
+    Horizontal { height: auto; }
+    """
+    
     def with_data(self, data: Any):
         self._data = data
         return self
     
     def compose(self) -> ComposeResult:
-        yield Label(" General information:")
-        yield Input(
-            id="email",
-            placeholder="Enter email e.g. example@gmail.com",
-            type="text",
-            value=self._data['email_address'],
-            validators=[EmailValidator()],
-        )
-        yield Input(
-            id="address",
-            placeholder="Enter address",
-            type="text",
-            value=self._data['address'],
-            validators=[RequireValidator()],
-        )
-        yield Input(
-            id="birthdate",
-            placeholder="Enter birthdate YYYY-MM-DD",
-            type="text",
-            value=self._data['birthdate'],
-            validators=[ISODateValidator()],
-        )
-        yield Input(
-            id="mobile",
-            placeholder="Enter mobile e.g. +64-21-555-1001",
-            type="text",
-            value=self._data['mobile_no'],
-            validators=[PhoneValidator()],
-        )
+        yield Label("General information:", classes="header")
+        with Horizontal():
+            yield Label("Email: ")
+            yield Input(
+                id="email",
+                placeholder="Enter email e.g. example@gmail.com",
+                type="text",
+                value=self._data['email_address'],
+                validators=[EmailValidator()],
+                compact=True
+            )
+        with Horizontal():
+            yield Label("Address: ")
+            yield Input(
+                id="address",
+                placeholder="Enter address",
+                type="text",
+                value=self._data['address'],
+                validators=[RequireValidator()],
+                compact=True
+            )
+        with Horizontal():
+            yield Label("Birthdate: ")
+            yield MaskedInput(
+                id="birthdate",
+                template="0000-00-00",
+                placeholder="YYYY-MM-DD",
+                value=self._data['birthdate'],
+                validators=[ISODateValidator()],
+                compact=True
+            )
+        with Horizontal():
+            yield Label("Mobile: ")
+            yield Input(
+                id="mobile",
+                placeholder="Enter mobile e.g. +64-21-555-1001",
+                type="text",
+                value=self._data['mobile_no'],
+                validators=[PhoneValidator()],
+                compact=True
+            )
         yield Label("\n")
-        yield Label(" Passport information:")
-        yield Input(
-            id="passport-no",
-            placeholder="Enter passport no",
-            type="text",
-            value=self._data['passport']['no'],
-            validators=[RequireValidator()],
-        )
-        yield Select(
-            [("New Zealand", "NZ"), ("Australia", "AU")],
-            value=self._data['passport']['country_code'],
-            id="passport-country",
-            allow_blank=False,
-        )
-        yield Select(
-            [("Female", "F"), ("Male", "M")],
-            value=self._data['passport']['gender'],
-            id="passport-gender",
-            allow_blank=False,
-        )
-        yield Input(
-            id="passport-first-name",
-            placeholder="Enter passport first name",
-            type="text",
-            value=self._data['passport']['first_name'],
-            validators=[RequireValidator()],
-        )
-        yield Input(
-            id="passport-last-name",
-            placeholder="Enter passport last name",
-            type="text",
-            value=self._data['passport']['last_name'],
-            validators=[RequireValidator()],
-        )
-        yield Input(
-            id="passport-expired-at",
-            placeholder="Enter passport expired at YYYY-MM-DD",
-            type="text",
-            value=self._data['passport']['expired_at'],
-            validators=[ISODateValidator()],
-        )
+        yield Label("Passport information:", classes="header")
+        with Horizontal():
+            yield Label("passport no: ")
+            yield Input(
+                id="passport-no",
+                placeholder="Enter passport no",
+                type="text",
+                value=self._data['passport']['no'],
+                validators=[RequireValidator()],
+                compact=True
+            )
+        with Horizontal():
+            yield Label("Country code: ")
+            yield Select(
+                [("New Zealand", "NZ"), ("Australia", "AU")],
+                value=self._data['passport']['country_code'],
+                id="passport-country",
+                allow_blank=False,
+                compact=True
+            )
+        with Horizontal():
+            yield Label("Gender: ")
+            yield Select(
+                [("Female", "F"), ("Male", "M")],
+                value=self._data['passport']['gender'],
+                id="passport-gender",
+                allow_blank=False,
+                compact=True
+            )
+        with Horizontal():
+            yield Label("First name: ")
+            yield Input(
+                id="passport-first-name",
+                placeholder="Enter passport first name",
+                type="text",
+                value=self._data['passport']['first_name'],
+                validators=[RequireValidator()],
+                compact=True
+            )
+        with Horizontal():
+            yield Label("Last name: ")
+            yield Input(
+                id="passport-last-name",
+                placeholder="Enter passport last name",
+                type="text",
+                value=self._data['passport']['last_name'],
+                validators=[RequireValidator()],
+                compact=True
+            )
+        with Horizontal():
+            yield Label("Expire date: ")
+            yield MaskedInput(
+                id="passport-expired-at",
+                template="0000-00-00",
+                placeholder="YYYY-MM-DD",
+                value=self._data['passport']['expired_at'],
+                validators=[ISODateValidator()],
+                compact=True
+            )
+
         yield Label("\n")
-        yield Label(" Driver license information:")
-        yield Input(
-            id="driver-license-no",
-            placeholder="Enter driver license no",
-            type="text",
-            value=self._data['driver_license']['no'],
-            validators=[RequireValidator()],
-        )
-        yield Select(
-            [("New Zealand", "NZ"), ("Australia", "AU")],
-            value=self._data['driver_license']['country_code'],
-            id="driver-license-country",
-            allow_blank=False,
-        )
-        yield Input(
-            id="driver-license-expired-at",
-            placeholder="Enter driver license expired at YYYY-MM-DD",
-            type="text",
-            value=self._data['driver_license']['expired_at'],
-            validators=[ISODateValidator()],
-        )
-        yield Button("Update", id="update")
+        yield Label("Driver license information:", classes="header")
+        with Horizontal():
+            yield Label("Driver license no: ")
+            yield Input(
+                id="driver-license-no",
+                placeholder="Enter driver license no",
+                type="text",
+                value=self._data['driver_license']['no'],
+                validators=[RequireValidator()],
+                compact=True
+            )
+        with Horizontal():
+            yield Label("Country code: ")
+            yield Select(
+                [("New Zealand", "NZ"), ("Australia", "AU")],
+                value=self._data['driver_license']['country_code'],
+                id="driver-license-country",
+                allow_blank=False,
+                compact=True
+            )
+        with Horizontal():
+            yield Label("Expire date: ")
+            yield MaskedInput(
+                id="driver-license-expired-at",
+                template="0000-00-00",
+                placeholder="YYYY-MM-DD",
+                value=self._data['driver_license']['expired_at'],
+                validators=[ISODateValidator()],
+                compact=True
+            )
+        yield Label("\n")
+        yield Button("Update", id="update", compact=True)
 
     @on(Input.Submitted)
     def _any_input_submitted(self, event: Input.Submitted) -> None:

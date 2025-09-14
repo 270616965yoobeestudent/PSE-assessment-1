@@ -1,10 +1,12 @@
 from argparse import _SubParsersAction, ArgumentParser
 from typing import Any, Mapping
+from cgps.cli.guards.guest_guard import guest
+from cgps.cli.guards.login_guard import logged_in
 from cgps.cli.user_cli import UserCli
-from cgps.core.guards.guest_guard import guest
-from cgps.core.guards.login_guard import logged_in
 from cgps.core.services.customer.customer_auth_service import CustomerAuthService
-from cgps.core.services.customer.customer_info_service import CustomeInfoService
+from cgps.core.services.customer.customer_car_service import CustomerCarService
+from cgps.core.services.customer.customer_info_service import CustomerInfoService
+from cgps.core.services.customer.customer_order_service import CustomerOrderService
 from cgps.ui.customer_info_form_ui import CustomerInfoFormUi
 from cgps.ui.customer_register_ui import CustomerRegisterUi
 from cgps.ui.info_ui import InfoUi
@@ -15,7 +17,9 @@ class CustomerCli(UserCli):
     def __init__(
         self,
         auth_service: CustomerAuthService,
-        info_service: CustomeInfoService,
+        info_service: CustomerInfoService,
+        order_service: CustomerOrderService,  # Assuming order_service is defined elsewhere
+        car_service: CustomerCarService,    # Assuming car_service is defined elsewhere
         login_ui: LoginUi,
         register_ui: CustomerRegisterUi,
         info_form_ui: CustomerInfoFormUi,
@@ -26,6 +30,8 @@ class CustomerCli(UserCli):
         self._info_ui = info_ui
         self._info_form_ui = info_form_ui
         self._info_service = info_service
+        self._order_service = order_service
+        self._car_service = car_service
 
     def run(self, role: _SubParsersAction):
         customer: ArgumentParser = role.add_parser("customer", help="customer commands")

@@ -6,6 +6,7 @@ from typing import ClassVar, Optional, Dict, Any
 
 ISO_DT = "%Y-%m-%d %H:%M:%S"
 
+
 def to_bool(v) -> Optional[bool]:
     if v is None:
         return None
@@ -49,6 +50,10 @@ def only_keys(d: dict, keys: list[str]) -> dict:
     return {k: d.get(k) for k in keys}
 
 
+def _strip_prefix(d: dict, prefix: str) -> dict:
+    return {k[len(prefix) :]: v for k, v in d.items() if k.startswith(prefix)}
+
+
 @dataclass
 class DBModel:
     """Base for SQLite rows."""
@@ -60,7 +65,7 @@ class DBModel:
         conv = getattr(cls, "_converters", {}) or {}
         kw = {}
         for f in fields(cls):
-            if f.name.startswith("_"): 
+            if f.name.startswith("_"):
                 continue
             v = row.get(f.name)
             if v is not None and f.name in conv:
@@ -71,7 +76,7 @@ class DBModel:
     def to_db(self) -> Dict[str, Any]:
         out: Dict[str, Any] = {}
         for f in fields(self):
-            if f.name.startswith("_"): 
+            if f.name.startswith("_"):
                 continue
             v = getattr(self, f.name)
             if v is None:
@@ -84,7 +89,7 @@ class DBModel:
             elif isinstance(v, date):
                 out[f.name] = v.isoformat()
             elif isinstance(v, Decimal):
-                out[f.name] = str(v) 
+                out[f.name] = str(v)
             else:
                 out[f.name] = v
         return out

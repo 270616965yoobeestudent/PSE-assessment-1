@@ -1,5 +1,5 @@
-from cgps.core.guards.guest_guard import guest
-from cgps.core.guards.login_guard import logged_in
+from cgps.cli.guards.guest_guard import guest
+from cgps.cli.guards.login_guard import logged_in
 from cgps.core.services.auth_service import AuthService
 from cgps.ui.login_ui import LoginUi
 
@@ -27,6 +27,6 @@ class UserCli:
             print("Login failed")
 
     @logged_in()
-    def _logout(self):
+    def _logout(self, user_id: int):
         self._auth_service.logout()
         print("Logout successful")

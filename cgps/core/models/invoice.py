@@ -3,6 +3,8 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
+from sympy import Order
+
 from cgps.core.models.db_model import DBModel, to_decimal, to_dt
 
 
@@ -15,6 +17,7 @@ class Invoice(DBModel):
     paid_at: Optional[datetime] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    order: Optional["Order"] = None
     _converters = {
         "amount": to_decimal,
         "paid_amount": to_decimal,

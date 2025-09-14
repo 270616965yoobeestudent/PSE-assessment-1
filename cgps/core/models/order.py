@@ -26,7 +26,6 @@ class Order(DBModel):
     updated_at: Optional[datetime] = None
     customer: Optional["Customer"] = None
     car: Optional["Car"] = None
-    invoice: Optional["Invoice"] = None
     _converters = {
         "started_at": to_dt,
         "ended_at": to_dt,

@@ -6,7 +6,7 @@ from cgps.core.models.driver_license import DriverLicense
 from cgps.core.models.passport import Passport
 
 
-class CustomeInfoService:
+class CustomerInfoService:
     def __init__(self, database: Database):
         self._database = database
 

@@ -6,7 +6,9 @@ from cgps.cli.customer_cli import CustomerCli
 from cgps.core.database import Database
 from cgps.core.services.admin.admin_auth_service import AdminAuthService
 from cgps.core.services.customer.customer_auth_service import CustomerAuthService
-from cgps.core.services.customer.customer_info_service import CustomeInfoService
+from cgps.core.services.customer.customer_car_service import CustomerCarService
+from cgps.core.services.customer.customer_info_service import CustomerInfoService
+from cgps.core.services.customer.customer_order_service import CustomerOrderService
 from cgps.ui.customer_info_form_ui import CustomerInfoFormUi
 from cgps.ui.customer_register_ui import CustomerRegisterUi
 from cgps.ui.info_ui import InfoUi
@@ -37,7 +39,15 @@ class Container(containers.DeclarativeContainer):
         jwt_secret_key=config.customer.jwt_secret_key,
     )
     customer_info_service = providers.Factory(
-        CustomeInfoService,
+        CustomerInfoService,
+        database=database,
+    )
+    customer_order_service = providers.Factory(
+        CustomerOrderService,
+        database=database,
+    )
+    customer_car_service = providers.Factory(
+        CustomerCarService,
         database=database,
     )
 
@@ -58,6 +68,8 @@ class Container(containers.DeclarativeContainer):
         CustomerCli,
         auth_service=customer_auth_service,
         info_service=customer_info_service,
+        order_service=customer_order_service,
+        car_service=customer_car_service,
         login_ui=login_ui,
         register_ui=customer_register_ui,
         info_ui=info_ui,
