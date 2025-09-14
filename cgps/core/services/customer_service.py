@@ -3,7 +3,7 @@ from cgps.core.database import Database
 from cgps.core.models.customer import Customer
 from cgps.core.models.driver_license import DriverLicense
 from cgps.core.models.passport import Passport
-from cgps.core.utils import ISO_DT, only_keys
+from cgps.core.utils import ISO_DT, only_keys, to_update_column
 
 
 class CustomerService:
@@ -47,8 +47,9 @@ class CustomerService:
             ],
         )
         passport_data.update(updated_at=now)
-        passport_cols = list(passport_data.keys())
-        passport_sql = f"UPDATE passports SET {", ".join(f"{c}=:{c}" for c in passport_cols)} WHERE id=:id"
+        passport_sql = (
+            f"UPDATE passports SET {to_update_column(passport_data)} WHERE id=:id"
+        )
         self._database.execute(passport_sql, passport_data)
 
         license_data = customer.driver_license.to_db()
@@ -63,8 +64,9 @@ class CustomerService:
             ],
         )
         license_data.update(updated_at=now)
-        license_cols = list(license_data.keys())
-        license_sql = f"UPDATE driver_licenses SET {", ".join(f"{c}=:{c}" for c in license_cols)} WHERE id=:id"
+        license_sql = (
+            f"UPDATE driver_licenses SET {to_update_column(license_data)} WHERE id=:id"
+        )
         self._database.execute(license_sql, license_data)
 
         customer_data = customer.to_db()
@@ -83,9 +85,10 @@ class CustomerService:
                 "updated_at",
             ],
         )
-        customer_cols = list(customer_data.keys())
-        customer_sql = f"UPDATE customers SET {", ".join(f"{c}=:{c}" for c in customer_cols)} WHERE id=:id"
+        customer_sql = (
+            f"UPDATE customers SET {to_update_column(customer_data)} WHERE id=:id"
+        )
         self._database.execute(customer_sql, customer_data)
         self._database.commit()
 
-        return customer
+        return True

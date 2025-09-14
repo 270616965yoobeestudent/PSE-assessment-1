@@ -1,10 +1,9 @@
-from __future__ import annotations
-from dataclasses import dataclass, fields
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Optional
 
 ISO_DT = "%Y-%m-%d %H:%M:%S"
+
 
 def to_bool(v) -> Optional[bool]:
     if v is None:
@@ -52,3 +51,11 @@ def only_keys(d: dict, keys: list[str]) -> dict:
 def strip_prefix(d: dict, prefix: str) -> dict:
     return {k[len(prefix) :]: v for k, v in d.items() if k.startswith(prefix)}
 
+
+def to_update_column(data: dict[str, any]) -> str:
+    cols = list(data.keys())
+    return ", ".join(f"{c}=:{c}" for c in cols)
+
+def to_insert_column(data: dict[str, any]) -> str:
+    cols = list(data.keys())
+    return f"({','.join(cols)}) VALUES ({','.join(':'+c for c in cols)})"

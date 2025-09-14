@@ -2,7 +2,7 @@ from datetime import datetime
 from cgps.core.database import Database
 from cgps.core.models.customer import Customer
 from cgps.core.services.auth_service import AuthService
-from cgps.core.utils import ISO_DT, only_keys
+from cgps.core.utils import ISO_DT, only_keys, to_insert_column
 
 
 class CustomerAuthService(AuthService):
@@ -67,8 +67,7 @@ class CustomerAuthService(AuthService):
             ],
         )
         passport_data.update(created_at=now, updated_at=now)
-        passport_cols = list(passport_data.keys())
-        passport_sql = f"INSERT INTO passports ({','.join(passport_cols)}) VALUES ({','.join(':'+c for c in passport_cols)})"
+        passport_sql = f"INSERT INTO passports {to_insert_column(passport_data)}"
         passport_id = self._database.execute(passport_sql, passport_data)
 
         license_data = data.driver_license.to_db()
@@ -81,8 +80,7 @@ class CustomerAuthService(AuthService):
             ],
         )
         license_data.update(created_at=now, updated_at=now)
-        license_cols = list(license_data.keys())
-        license_sql = f"INSERT INTO driver_licenses ({','.join(license_cols)}) VALUES ({','.join(':'+c for c in license_cols)})"
+        license_sql = f"INSERT INTO driver_licenses {to_insert_column(license_data)}"
         license_id = self._database.execute(license_sql, license_data)
 
         customer_data = data.to_db()
@@ -108,8 +106,7 @@ class CustomerAuthService(AuthService):
                 "updated_at",
             ],
         )
-        customer_cols = list(customer_data.keys())
-        customer_sql = f"INSERT INTO customers ({','.join(customer_cols)}) VALUES ({','.join(':'+c for c in customer_cols)})"
+        customer_sql = f"INSERT INTO customers {to_insert_column(customer_data)}"
         self._database.execute(customer_sql, customer_data)
         self._database.commit()
         return True
