@@ -3,6 +3,7 @@ from typing import Any, Mapping
 from cgps.cli.guards.guest_guard import guest
 from cgps.cli.guards.login_guard import logged_in
 from cgps.cli.user_cli import UserCli
+from cgps.core.models.invoice import Invoice
 from cgps.core.services.customer.customer_auth_service import CustomerAuthService
 from cgps.core.services.customer.customer_car_service import CustomerCarService
 from cgps.core.services.customer.customer_info_service import CustomerInfoService
@@ -11,6 +12,7 @@ from cgps.ui.customer_info_form_ui import CustomerInfoFormUi
 from cgps.ui.customer_register_ui import CustomerRegisterUi
 from cgps.ui.info_ui import InfoUi
 from cgps.ui.login_ui import LoginUi
+from cgps.ui.order_list_ui import OrderListUi
 
 
 class CustomerCli(UserCli):
@@ -18,17 +20,19 @@ class CustomerCli(UserCli):
         self,
         auth_service: CustomerAuthService,
         info_service: CustomerInfoService,
-        order_service: CustomerOrderService,  # Assuming order_service is defined elsewhere
-        car_service: CustomerCarService,    # Assuming car_service is defined elsewhere
+        order_service: CustomerOrderService,
+        car_service: CustomerCarService, 
         login_ui: LoginUi,
         register_ui: CustomerRegisterUi,
         info_form_ui: CustomerInfoFormUi,
         info_ui: InfoUi,
+        order_list_ui: OrderListUi,
     ):
         super().__init__(auth_service, login_ui)
         self._register_ui = register_ui
         self._info_ui = info_ui
         self._info_form_ui = info_form_ui
+        self._order_list_ui = order_list_ui
         self._info_service = info_service
         self._order_service = order_service
         self._car_service = car_service
@@ -70,7 +74,8 @@ class CustomerCli(UserCli):
         order_cmd = order.add_subparsers(
             dest="cmd", title="Usage", metavar="order <command>"
         )
-        order_cmd.add_parser("list", help="view all rent orders")
+        order_list = order_cmd.add_parser("list", help="view all rent orders")
+        order_list.set_defaults(func=lambda _: self._list_orders())
 
     @guest()
     def _register(self):
@@ -91,6 +96,8 @@ class CustomerCli(UserCli):
     def _info_update(self, user_id: int):
         data = self._get_info(user_id)
         result = self._info_form_ui.with_data(data).run()
+        if result is None:
+            return
         if not self._info_service.update_info(result):
             print("Update info failed")
             return
@@ -105,3 +112,14 @@ class CustomerCli(UserCli):
         info_data['passport'] = passport.to_db()
         info_data['driver_license'] = license.to_db()
         return info_data
+    
+    @logged_in()
+    def _list_orders(self, user_id: int):
+        invoices = self._order_service.my_orders(user_id)
+        invoices_data = []
+        for invoice in invoices:
+            data = invoice.to_db()
+            data['order'] = invoice.order.to_db()
+            data['order']['car'] = invoice.order.car.to_db()
+            invoices_data.append(data)
+        self._order_list_ui.with_data(invoices_data).run()

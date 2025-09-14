@@ -13,6 +13,7 @@ from cgps.ui.customer_info_form_ui import CustomerInfoFormUi
 from cgps.ui.customer_register_ui import CustomerRegisterUi
 from cgps.ui.info_ui import InfoUi
 from cgps.ui.login_ui import LoginUi
+from cgps.ui.order_list_ui import OrderListUi
 
 
 class Container(containers.DeclarativeContainer):
@@ -57,6 +58,7 @@ class Container(containers.DeclarativeContainer):
     info_ui = providers.Factory(InfoUi)
     customer_register_ui = providers.Factory(CustomerRegisterUi)
     customer_info_form_ui = providers.Factory(CustomerInfoFormUi)
+    order_list_ui = providers.Factory(OrderListUi)
 
     # CLI Factory
     admin_cli = providers.Factory(
@@ -73,7 +75,8 @@ class Container(containers.DeclarativeContainer):
         login_ui=login_ui,
         register_ui=customer_register_ui,
         info_ui=info_ui,
-        info_form_ui=customer_info_form_ui
+        info_form_ui=customer_info_form_ui,
+        order_list_ui=order_list_ui
     )
     app_cli = providers.Factory(
         AppCli,
