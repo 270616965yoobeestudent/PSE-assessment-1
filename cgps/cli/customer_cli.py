@@ -8,8 +8,8 @@ from cgps.core.services.customer.customer_auth_service import CustomerAuthServic
 from cgps.core.services.customer.customer_car_service import CustomerCarService
 from cgps.core.services.customer.customer_info_service import CustomerInfoService
 from cgps.core.services.customer.customer_order_service import CustomerOrderService
-from cgps.ui.customer_info_form_ui import CustomerInfoFormUi
-from cgps.ui.customer_register_ui import CustomerRegisterUi
+from cgps.ui.info_form_ui import InfoFormUi
+from cgps.ui.register_ui import RegisterUi
 from cgps.ui.info_ui import InfoUi
 from cgps.ui.login_ui import LoginUi
 from cgps.ui.order_list_ui import OrderListUi
@@ -23,8 +23,8 @@ class CustomerCli(UserCli):
         order_service: CustomerOrderService,
         car_service: CustomerCarService, 
         login_ui: LoginUi,
-        register_ui: CustomerRegisterUi,
-        info_form_ui: CustomerInfoFormUi,
+        register_ui: RegisterUi,
+        info_form_ui: InfoFormUi,
         info_ui: InfoUi,
         order_list_ui: OrderListUi,
     ):

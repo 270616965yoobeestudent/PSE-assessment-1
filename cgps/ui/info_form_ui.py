@@ -1,3 +1,4 @@
+from typing import Any
 from textual import on
 from textual.app import App, ComposeResult
 from textual.widgets import Input, Label, Select, Button, MaskedInput
@@ -14,45 +15,18 @@ from cgps.ui.validators.phone_validator import PhoneValidator
 from cgps.ui.validators.require_validator import RequireValidator
 
 
-class CustomerRegisterUi(App):
+class InfoFormUi(App):
     CSS = """
     Label.header { color: white; text-style: bold; }
+    Label { color: grey; }
     Horizontal { height: auto; }
     """
-
+    
+    def with_data(self, data: Any):
+        self._data = data
+        return self
+    
     def compose(self) -> ComposeResult:
-        password = Input(
-            id="password",
-            placeholder="Enter password",
-            type="text",
-            password=True,
-            validators=[RequireValidator()],
-            compact=True
-        )
-        yield Label("Login information:", classes="header")
-        with Horizontal():
-            yield Label("Username: ")
-            yield Input(
-                id="username",
-                placeholder="Enter username",
-                type="text",
-                validators=[RequireValidator()],
-                compact=True
-            )
-        with Horizontal():
-            yield Label("Password: ")
-            yield password
-        with Horizontal():
-            yield Label("Re-password: ")
-            yield Input(
-                id="password-confirm",
-                placeholder="Enter confirm password",
-                type="text",
-                password=True,
-                validators=[MatchesInput(password)],
-                compact=True
-        )
-        yield Label("\n")
         yield Label("General information:", classes="header")
         with Horizontal():
             yield Label("Email: ")
@@ -60,6 +34,7 @@ class CustomerRegisterUi(App):
                 id="email",
                 placeholder="Enter email e.g. example@gmail.com",
                 type="text",
+                value=self._data['email_address'],
                 validators=[EmailValidator()],
                 compact=True
             )
@@ -69,6 +44,7 @@ class CustomerRegisterUi(App):
                 id="address",
                 placeholder="Enter address",
                 type="text",
+                value=self._data['address'],
                 validators=[RequireValidator()],
                 compact=True
             )
@@ -78,6 +54,7 @@ class CustomerRegisterUi(App):
                 id="birthdate",
                 template="0000-00-00",
                 placeholder="YYYY-MM-DD",
+                value=self._data['birthdate'],
                 validators=[ISODateValidator()],
                 compact=True
             )
@@ -85,8 +62,9 @@ class CustomerRegisterUi(App):
             yield Label("Mobile: ")
             yield Input(
                 id="mobile",
-                placeholder="Enter mobile e.g. +642-155-500",
+                placeholder="Enter mobile e.g. +64-21-555-1001",
                 type="text",
+                value=self._data['mobile_no'],
                 validators=[PhoneValidator()],
                 compact=True
             )
@@ -98,6 +76,7 @@ class CustomerRegisterUi(App):
                 id="passport-no",
                 placeholder="Enter passport no",
                 type="text",
+                value=self._data['passport']['no'],
                 validators=[RequireValidator()],
                 compact=True
             )
@@ -105,7 +84,7 @@ class CustomerRegisterUi(App):
             yield Label("Country code: ")
             yield Select(
                 [("New Zealand", "NZ"), ("Australia", "AU")],
-                value="NZ",
+                value=self._data['passport']['country_code'],
                 id="passport-country",
                 allow_blank=False,
                 compact=True
@@ -114,7 +93,7 @@ class CustomerRegisterUi(App):
             yield Label("Gender: ")
             yield Select(
                 [("Female", "F"), ("Male", "M")],
-                value="M",
+                value=self._data['passport']['gender'],
                 id="passport-gender",
                 allow_blank=False,
                 compact=True
@@ -125,6 +104,7 @@ class CustomerRegisterUi(App):
                 id="passport-first-name",
                 placeholder="Enter passport first name",
                 type="text",
+                value=self._data['passport']['first_name'],
                 validators=[RequireValidator()],
                 compact=True
             )
@@ -134,6 +114,7 @@ class CustomerRegisterUi(App):
                 id="passport-last-name",
                 placeholder="Enter passport last name",
                 type="text",
+                value=self._data['passport']['last_name'],
                 validators=[RequireValidator()],
                 compact=True
             )
@@ -143,6 +124,7 @@ class CustomerRegisterUi(App):
                 id="passport-expired-at",
                 template="0000-00-00",
                 placeholder="YYYY-MM-DD",
+                value=self._data['passport']['expired_at'],
                 validators=[ISODateValidator()],
                 compact=True
             )
@@ -155,6 +137,7 @@ class CustomerRegisterUi(App):
                 id="driver-license-no",
                 placeholder="Enter driver license no",
                 type="text",
+                value=self._data['driver_license']['no'],
                 validators=[RequireValidator()],
                 compact=True
             )
@@ -162,8 +145,8 @@ class CustomerRegisterUi(App):
             yield Label("Country code: ")
             yield Select(
                 [("New Zealand", "NZ"), ("Australia", "AU")],
+                value=self._data['driver_license']['country_code'],
                 id="driver-license-country",
-                value="NZ",
                 allow_blank=False,
                 compact=True
             )
@@ -173,11 +156,12 @@ class CustomerRegisterUi(App):
                 id="driver-license-expired-at",
                 template="0000-00-00",
                 placeholder="YYYY-MM-DD",
+                value=self._data['driver_license']['expired_at'],
                 validators=[ISODateValidator()],
                 compact=True
             )
         yield Label("\n")
-        yield Button("Register", id="register", compact=True)
+        yield Button("Update", id="update", compact=True)
 
     @on(Input.Submitted)
     def _any_input_submitted(self, event: Input.Submitted) -> None:
@@ -189,7 +173,7 @@ class CustomerRegisterUi(App):
         if event.key == "escape":
             self.exit()
 
-    @on(Button.Pressed, "#register")
+    @on(Button.Pressed, "#update")
     async def _action(self):
         inputs = list(self.query(Input))
         results = [w.validate(w.value) for w in inputs]
@@ -201,29 +185,32 @@ class CustomerRegisterUi(App):
             return
 
         data = Customer(
-            id=0,
-            username=self.query_one("#username", Input).value,
-            password=self.query_one("#password", Input).value,
+            id=self._data['id'],
+            username=self._data['username'],
+            password='',
             email_address=self.query_one("#email", Input).value,
             address=self.query_one("#address", Input).value,
             birthdate=self.query_one("#birthdate", Input).value,
             mobile_no=self.query_one("#mobile", Input).value,
-            passport_id=0,
-            driver_license_id=0,
+            passport_id=self._data['passport']['id'],
+            driver_license_id=self._data['driver_license']['id'],
+            created_at=self._data['created_at'],
             passport=Passport(
-                id=0,
+                id=self._data['passport']['id'],
                 no=self.query_one("#passport-no", Input).value,
                 country_code=self.query_one("#passport-country", Select).value,
                 gender=self.query_one("#passport-gender", Select).value,
                 first_name=self.query_one("#passport-first-name", Input).value,
                 last_name=self.query_one("#passport-last-name", Input).value,
                 expired_at=self.query_one("#passport-expired-at", Input).value,
+                created_at=self._data['passport']['created_at'],
             ),
             driver_license=DriverLicense(
-                id=0,
+                id=self._data['driver_license']['id'],
                 no=self.query_one("#driver-license-no", Input).value,
                 country_code=self.query_one("#driver-license-country", Select).value,
                 expired_at=self.query_one("#driver-license-expired-at", Input).value,
+                created_at=self._data['driver_license']['created_at'],
             ),
         )
         self.exit(data)
