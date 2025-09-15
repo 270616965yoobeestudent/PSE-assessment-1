@@ -60,7 +60,7 @@ class Container(containers.DeclarativeContainer):
     register_ui = providers.Factory(RegisterUi)
     info_form_ui = providers.Factory(InfoFormUi)
     order_list_ui = providers.Factory(OrderListUi)
-    rent_ui = providers.Factory(RentUi)
+    rent_ui = providers.Factory(RentUi, car_service=car_service)
 
     # CLI Factory
     admin_cli = providers.Factory(

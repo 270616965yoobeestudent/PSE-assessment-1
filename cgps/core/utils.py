@@ -1,6 +1,7 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from decimal import Decimal
-from typing import Optional
+import math
+from typing import Mapping, Optional
 
 ISO_DT = "%Y-%m-%d %H:%M:%S"
 
@@ -56,6 +57,20 @@ def to_update_column(data: dict[str, any]) -> str:
     cols = list(data.keys())
     return ", ".join(f"{c}=:{c}" for c in cols)
 
+
 def to_insert_column(data: dict[str, any]) -> str:
     cols = list(data.keys())
     return f"({','.join(cols)}) VALUES ({','.join(':'+c for c in cols)})"
+
+
+def count_days(start: datetime, end: datetime) -> Mapping[str, int]:
+    total_days = math.ceil((end - start).total_seconds() / 86400)
+    weekdays = 0
+    weekends = 0
+    for i in range(total_days):
+        current_day = start + timedelta(days=i)
+        if current_day.weekday() >= 5:  # 5 = Sat, 6 = Sun
+            weekends += 1
+        else:
+            weekdays += 1
+    return {"weekdays": weekdays, "weekends": weekends}

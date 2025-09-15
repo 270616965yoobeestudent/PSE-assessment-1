@@ -20,6 +20,9 @@ class Car(DBModel):
     color: Optional[str] = None
     type: Optional[str] = None
     seat: Optional[int] = None
+    mileage: Optional[int] = None
+    minimum_rent: Optional[int] = None
+    maximum_rent: Optional[int] = None
     factory_date: Optional[date] = None
     weekday_rate: Optional[Decimal] = None
     weekend_rate: Optional[Decimal] = None

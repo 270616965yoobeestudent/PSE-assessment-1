@@ -43,7 +43,7 @@ class Database:
         return dict(row) if row is not None else None
 
     def fetchall(self, sql: str, params: Iterable[Any] = ()) -> List[dict[str, any]]:
-        cur = self.connection().execute(sql, tuple(params))
+        cur = self.connection().execute(sql, params)
         rows = [dict(r) for r in cur.fetchall()]
         cur.close()
         return rows

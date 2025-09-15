@@ -32,10 +32,10 @@ class AppCli:
                     "    cgps admin logout                logout from system",
                     "    cgps admin gps list              list all gps devices",
                     "    cgps admin gps register          register a new gps device",
-                    "    cgps admin gps remove            remove a gps device",
                     "    cgps admin car list              list all cars",
                     "    cgps admin car register          register a new car",
-                    "    cgps admin car remove            remove a car",
+                    "    cgps admin car update            update general information of a car",
+                    "    cgps admin car return            make a car available for renting",
                     "    cgps admin car report            view cars tracking report in realtime",
                     "    cgps admin order list            view all rent orders",
                     "\n"
@@ -46,7 +46,6 @@ class AppCli:
                     "    cgps customer info view          view customer information",
                     "    cgps customer info update        update general information",
                     "    cgps customer car rent           rent a car",
-                    "    cgps customer car return         return a car",
                     "    cgps customer order list         view all rent orders",
                 ]
             ),

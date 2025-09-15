@@ -1,8 +1,9 @@
+from datetime import datetime
 from cgps.core.database import Database
 from cgps.core.models.car import Car
 from cgps.core.models.invoice import Invoice
 from cgps.core.models.order import Order
-from cgps.core.utils import strip_prefix
+from cgps.core.utils import ISO_DT, only_keys, strip_prefix, to_insert_column
 
 
 class OrderService:
@@ -40,10 +41,10 @@ class OrderService:
             FROM invoices i
             JOIN orders o ON o.id = i.order_id
             JOIN cars c ON c.plate_license = o.car_plate_license
-            WHERE o.customer_id = ?
+            WHERE o.customer_id = :customer_id
             ORDER BY o.started_at DESC
             """,
-            (customer_id,),
+            {'customer_id': customer_id},
         )
         invoices: list[Invoice] = []
         for row in rows:
@@ -55,3 +56,47 @@ class OrderService:
             invoice.order = order
             invoices.append(invoice)
         return invoices
+
+    def rent_and_pay(self, customer_id: int, invoice: Invoice) -> bool:
+        now = datetime.now().strftime(ISO_DT)
+
+        self._database.begin()
+        order_data = invoice.order.to_db()
+        order_data = only_keys(
+            order_data,
+            [
+                "customer_id",
+                "car_plate_license",
+                "started_at",
+                "ended_at",
+                "total_day",
+                "total_weekday_amount",
+                "total_weekend_amount",
+                "total_amount",
+                "created_at",
+                "updated_at",
+            ],
+        )
+        order_data.update(customer_id=customer_id, created_at=now, updated_at=now)
+        order_sql = f"INSERT INTO orders {to_insert_column(order_data)}"
+        order_id = self._database.execute(order_sql, order_data)
+
+        invoice_data = invoice.to_db()
+        invoice_data = only_keys(
+            invoice_data,
+            [
+                "order_id",
+                "amount",
+                "paid_amount",
+                "paid_at",
+                "created_at",
+                "updated_at",
+            ],
+        )
+        invoice_data.update(
+            order_id=order_id, paid_at=now, created_at=now, updated_at=now
+        )
+        invoice_sql = f"INSERT INTO invoices {to_insert_column(invoice_data)}"
+        self._database.execute(invoice_sql, invoice_data)
+        self._database.commit()
+        return True

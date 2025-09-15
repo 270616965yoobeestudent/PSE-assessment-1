@@ -1,3 +1,4 @@
+import math
 from typing import Any
 from textual import on
 from textual.app import App, ComposeResult
@@ -44,15 +45,26 @@ class _OrderListTableScren(Screen):
             no = item["order"]["id"]
             pick_up = item["order"]["started_at"]
             drop_off = item["order"]["ended_at"]
-            t1 = datetime.strptime("2025-08-05 19:00:00", ISO_DT)
-            t2 = datetime.strptime("2025-08-08 18:00:00", ISO_DT)
-            duration = (t2 - t1).days
+            t1 = datetime.strptime(pick_up, ISO_DT)
+            t2 = datetime.strptime(drop_off, ISO_DT)
+            delta = t2 - t1
+            days = math.ceil(delta.total_seconds() / 86400)
+            duration = days
             car = f"{item['order']['car']['make']} {item['order']['car']['model']}"
             total_price = f"${to_decimal(item['order']['total_amount']):.2f}"
             status = "Paid" if item["paid_at"] else "Unpaid"
             issue_date = item["created_at"]
             rows.append(
-                (no, pick_up, drop_off, duration, car, total_price, status, issue_date)
+                (
+                    no,
+                    pick_up,
+                    drop_off,
+                    duration,
+                    car,
+                    total_price,
+                    status,
+                    issue_date,
+                )
             )
         table.add_rows(rows)
 

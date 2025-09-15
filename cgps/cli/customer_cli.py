@@ -22,7 +22,7 @@ class CustomerCli(UserCli):
         auth_service: CustomerAuthService,
         customer_service: CustomerService,
         order_service: OrderService,
-        car_service: CarService, 
+        car_service: CarService,
         login_ui: LoginUi,
         register_ui: RegisterUi,
         info_form_ui: InfoFormUi,
@@ -69,8 +69,8 @@ class CustomerCli(UserCli):
         car = cmd.add_parser("car", help="rent, return a car")
         car.set_defaults(func=lambda _: car.print_help())
         car_cmd = car.add_subparsers(dest="cmd", title="Usage", metavar="car <command>")
-        car_cmd.add_parser("rent", help="rent a car")
-        car_cmd.add_parser("return", help="return a car")
+        car_rent = car_cmd.add_parser("rent", help="rent a car")
+        car_rent.set_defaults(func=lambda _: self._rent_car())
 
         order = cmd.add_parser("order", help="list, update orders")
         order.set_defaults(func=lambda _: order.print_help())
@@ -94,7 +94,7 @@ class CustomerCli(UserCli):
     def _info_view(self, user_id: int):
         data = self._get_info(user_id)
         self._info_ui.with_data(data).run()
-    
+
     @logged_in()
     def _info_update(self, user_id: int):
         data = self._get_info(user_id)
@@ -111,18 +111,28 @@ class CustomerCli(UserCli):
         passport = info.passport
         license = info.driver_license
         info_data = info.to_db()
-        info_data.pop('password')
-        info_data['passport'] = passport.to_db()
-        info_data['driver_license'] = license.to_db()
+        info_data.pop("password")
+        info_data["passport"] = passport.to_db()
+        info_data["driver_license"] = license.to_db()
         return info_data
-    
+
     @logged_in()
     def _list_orders(self, user_id: int):
         invoices = self._order_service.my_orders(user_id)
         invoices_data = []
         for invoice in invoices:
             data = invoice.to_db()
-            data['order'] = invoice.order.to_db()
-            data['order']['car'] = invoice.order.car.to_db()
+            data["order"] = invoice.order.to_db()
+            data["order"]["car"] = invoice.order.car.to_db()
             invoices_data.append(data)
         self._order_list_ui.with_data(invoices_data).run()
+
+    @logged_in()
+    def _rent_car(self, user_id: int):
+        result: Invoice = self._rent_ui.with_data(user_id=user_id).run()
+        if result is None:
+            return
+        if not self._order_service.rent_and_pay(user_id, result):
+            print("Rent failed")
+            return
+        print("Rent successful")
