@@ -3,16 +3,23 @@ from cgps.core.database import Database
 from cgps.core.models.car import Car
 from cgps.core.models.invoice import Invoice
 from cgps.core.models.order import Order
-from cgps.core.utils import ISO_DT, only_keys, strip_prefix, to_insert_column
+from cgps.core.utils import ISO_DT, only_keys, strip_prefix, to_insert_column, to_update_column
 
 
 class OrderService:
     def __init__(self, database: Database):
         self._database = database
 
-    def my_orders(self, customer_id) -> list[Invoice]:
+    def list(self, customer_id: int = None) -> list[Invoice]:
+        extra_sql = (
+            "WHERE o.customer_id = :customer_id" if customer_id is not None else ""
+        )
+        extra_params = (
+            {"customer_id": customer_id} if customer_id is not None else {}
+        )
         rows = self._database.fetchall(
-            """
+            (
+                f"""
             SELECT
             o.*,
             i.id AS invoice__id,
@@ -37,14 +44,18 @@ class OrderService:
             c.available AS car__available,
             c.tracking_device_no AS car__tracking_device_no,
             c.created_at AS car__created_at,
-            c.updated_at AS car__updated_at
+            c.updated_at AS car__updated_at,
+            c.mileage AS car__mileage,
+            c.minimum_rent AS car__minimum_rent,
+            c.maximum_rent AS car__maximum_rent
             FROM invoices i
-            JOIN orders o ON o.id = i.order_id
+            JOIN orders o ON o.id = i.order_id AND o.deleted_at IS NULL
             JOIN cars c ON c.plate_license = o.car_plate_license
-            WHERE o.customer_id = :customer_id
-            ORDER BY o.started_at DESC
-            """,
-            {'customer_id': customer_id},
+            {extra_sql}
+            ORDER BY i.id DESC
+            """
+            ),
+            extra_params,
         )
         invoices: list[Invoice] = []
         for row in rows:
@@ -100,3 +111,17 @@ class OrderService:
         self._database.execute(invoice_sql, invoice_data)
         self._database.commit()
         return True
+    
+    def soft_delete(self, order_id: int) -> bool:
+        now = datetime.now().strftime(ISO_DT)
+
+        self._database.begin()
+        order_data = {
+            "deleted_at": now,
+            "updated_at": now,
+        }
+        order_sql = f"UPDATE orders SET {to_update_column(order_data)} WHERE id=:id"
+        self._database.execute(order_sql, {"id": order_id, **order_data})
+        self._database.commit()
+        return True
+    

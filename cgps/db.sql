@@ -117,6 +117,7 @@ CREATE TABLE orders (
   total_amount         NUMERIC,
   created_at           TEXT,
   updated_at           TEXT,
+  deleted_at           TEXT,
   FOREIGN KEY (customer_id)       REFERENCES customers(id),
   FOREIGN KEY (car_plate_license) REFERENCES cars(plate_license)
 );

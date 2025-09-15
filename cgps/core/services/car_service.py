@@ -2,6 +2,7 @@ from datetime import datetime
 from math import ceil
 from cgps.core.database import Database
 from cgps.core.models.car import Car
+from cgps.core.utils import to_days
 
 
 class CarService:
@@ -9,7 +10,7 @@ class CarService:
         self._database = database
 
     def list_available(self, started_at: datetime, ended_at: datetime):
-        days = ceil((ended_at - started_at).total_seconds() / 86400)
+        days = to_days(started_at, ended_at)
         cars_data = self._database.fetchall(
             """
             SELECT *

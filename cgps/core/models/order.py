@@ -24,6 +24,7 @@ class Order(DBModel):
     total_amount: Optional[Decimal] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    deleted_at: Optional[datetime] = None
     customer: Optional["Customer"] = None
     car: Optional["Car"] = None
     _converters = {

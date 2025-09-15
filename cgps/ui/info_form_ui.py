@@ -17,13 +17,14 @@ from cgps.ui.validators.require_validator import RequireValidator
 
 class InfoFormUi(App):
     CSS = """
-    Label.header { color: white; text-style: bold; }
+    Label.header { text-style: bold; }
     Label { color: grey; }
     Horizontal { height: auto; }
     """
     
-    def with_data(self, data: Any):
+    def with_data(self, data: Any, can_update: bool):
         self._data = data
+        self._can_update = can_update
         return self
     
     def compose(self) -> ComposeResult:
@@ -36,7 +37,7 @@ class InfoFormUi(App):
                 type="text",
                 value=self._data['email_address'],
                 validators=[EmailValidator()],
-                compact=True
+                compact=True,
             )
         with Horizontal():
             yield Label("Address: ")
@@ -161,7 +162,8 @@ class InfoFormUi(App):
                 compact=True
             )
         yield Label("\n")
-        yield Button("Update", id="update", compact=True)
+        if self._can_update:
+            yield Button("Update", id="update", compact=True)
 
     @on(Input.Submitted)
     def _any_input_submitted(self, event: Input.Submitted) -> None:

@@ -62,9 +62,11 @@ def to_insert_column(data: dict[str, any]) -> str:
     cols = list(data.keys())
     return f"({','.join(cols)}) VALUES ({','.join(':'+c for c in cols)})"
 
+def to_days(start: datetime, end: datetime) -> int:
+    return math.ceil((end - start).total_seconds() / 86400)
 
 def count_days(start: datetime, end: datetime) -> Mapping[str, int]:
-    total_days = math.ceil((end - start).total_seconds() / 86400)
+    total_days = to_days(start, end)
     weekdays = 0
     weekends = 0
     for i in range(total_days):

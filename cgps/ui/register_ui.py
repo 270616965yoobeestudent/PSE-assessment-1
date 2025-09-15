@@ -16,7 +16,7 @@ from cgps.ui.validators.require_validator import RequireValidator
 
 class RegisterUi(App):
     CSS = """
-    Label.header { color: white; text-style: bold; }
+    Label.header { text-style: bold; }
     Horizontal { height: auto; }
     """
 

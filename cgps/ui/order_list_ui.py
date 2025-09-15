@@ -1,28 +1,43 @@
 import math
-from typing import Any
 from textual import on
 from textual.app import App, ComposeResult
-from textual.widgets import Pretty, DataTable
+from textual.widgets import Label, DataTable, MaskedInput, Input, Button
 from textual.events import Key
 from textual.screen import Screen
-from datetime import datetime
+from textual.containers import Horizontal
 
-from cgps.core.utils import ISO_DT, to_decimal
+from cgps.core.models.invoice import Invoice
+from cgps.core.utils import to_decimal
+from cgps.ui.validators.iso_date_time_validator import (
+    DATE_TIME_INPUT,
+)
 
 
 class OrderListUi(App):
-    def with_data(self, data: list[dict[str, Any]]):
+    CSS = """
+    Label.header { text-style: bold; }
+    Horizontal { height: auto; }
+    """
+
+    def with_data(self, data: Invoice, can_update: bool):
         self._data = data
+        self._can_update = can_update
         return self
 
     def on_mount(self) -> None:
-        self.push_screen(_OrderListTableScren(self._data))
+        self.push_screen(
+            _OrderListTableScren(
+                self._data,
+                can_update=self._can_update,
+            )
+        )
 
 
 class _OrderListTableScren(Screen):
-    def __init__(self, data: list[dict[str, Any]]):
+    def __init__(self, data: Invoice, can_update: bool = False):
         super().__init__()
         self._data = data
+        self._can_update = can_update
 
     def compose(self) -> ComposeResult:
         yield DataTable()
@@ -42,18 +57,16 @@ class _OrderListTableScren(Screen):
         )
         rows = []
         for item in self._data:
-            no = item["order"]["id"]
-            pick_up = item["order"]["started_at"]
-            drop_off = item["order"]["ended_at"]
-            t1 = datetime.strptime(pick_up, ISO_DT)
-            t2 = datetime.strptime(drop_off, ISO_DT)
-            delta = t2 - t1
+            no = item.order.id
+            pick_up = item.order.started_at
+            drop_off = item.order.ended_at
+            delta = drop_off - pick_up
             days = math.ceil(delta.total_seconds() / 86400)
             duration = days
-            car = f"{item['order']['car']['make']} {item['order']['car']['model']}"
-            total_price = f"${to_decimal(item['order']['total_amount']):.2f}"
-            status = "Paid" if item["paid_at"] else "Unpaid"
-            issue_date = item["created_at"]
+            car = f"{item.order.car.make} {item.order.car.model}"
+            total_price = f"${to_decimal(item.order.total_amount):.2f}"
+            status = "Paid" if item.paid_at else "Unpaid"
+            issue_date = item.created_at
             rows.append(
                 (
                     no,
@@ -76,18 +89,126 @@ class _OrderListTableScren(Screen):
     @on(DataTable.RowSelected)
     def handle_row_selected(self, ev: DataTable.RowSelected) -> None:
         row_index = ev.cursor_row
-        self.app.push_screen(_OrderListDetailScren(self._data[row_index]))
+        self.app.push_screen(
+            _OrderListDetailScren(
+                data=self._data[row_index],
+                can_update=self._can_update,
+            )
+        )
 
 
 class _OrderListDetailScren(Screen):
-    def __init__(self, data: dict[str, Any]):
+    def __init__(self, data: Invoice, can_update: bool = False):
         super().__init__()
         self._data = data
+        self._can_update = can_update
 
     def compose(self) -> ComposeResult:
-        yield Pretty(self._data)
+        yield Label("Order", classes="header")
+        with Horizontal():
+            yield Label("Pick up time: ")
+            yield MaskedInput(
+                id="started_at",
+                template="0000-00-00 00:00",
+                placeholder="YYYY-MM-DD HH:MM",
+                value=self._data.order.started_at.strftime(DATE_TIME_INPUT),
+                compact=True,
+            )
+        with Horizontal():
+            yield Label("Drop off time: ")
+            yield MaskedInput(
+                id="ended_at",
+                template="0000-00-00 00:00",
+                placeholder="YYYY-MM-DD HH:MM",
+                value=self._data.order.ended_at.strftime(DATE_TIME_INPUT),
+                compact=True,
+            )
+        with Horizontal():
+            yield Label("Duration (day): ")
+            yield Input(
+                id="total_day",
+                value=str(self._data.order.total_day),
+                type="number",
+                compact=True,
+            )
+        with Horizontal():
+            yield Label("Price ($): ")
+            yield Input(
+                id="total_amount",
+                value=str(self._data.order.total_amount),
+                type="number",
+                compact=True,
+            )
+        with Horizontal():
+            yield Label("Issue at: ")
+            yield MaskedInput(
+                id="created_at",
+                template="0000-00-00 00:00",
+                placeholder="YYYY-MM-DD HH:MM",
+                value=self._data.created_at.strftime(DATE_TIME_INPUT),
+                compact=True,
+            )
+        yield Label("\n")
+        yield Label("Car", classes="header")
+        with Horizontal():
+            yield Label("Plate license: ")
+            yield Input(
+                id="plate_license",
+                value=self._data.order.car.plate_license,
+                type="text",
+                compact=True,
+            )
+        with Horizontal():
+            yield Label("Fuel type: ")
+            yield Input(
+                id="fuel_type",
+                value=self._data.order.car.fuel_type,
+                type="text",
+                compact=True,
+            )
+        with Horizontal():
+            yield Label("Make: ")
+            yield Input(
+                id="make", value=self._data.order.car.make, type="text", compact=True
+            )
+        with Horizontal():
+            yield Label("Model: ")
+            yield Input(
+                id="model", value=self._data.order.car.model, type="text", compact=True
+            )
+        with Horizontal():
+            yield Label("Year: ")
+            yield Input(
+                id="year",
+                value=str(self._data.order.car.year),
+                type="number",
+                compact=True,
+            )
+        with Horizontal():
+            yield Label("Seat: ")
+            yield Input(
+                id="seat",
+                value=str(self._data.order.car.seat),
+                type="number",
+                compact=True,
+            )
+        with Horizontal():
+            yield Label("Mileage: ")
+            yield Input(
+                id="mileage",
+                value=str(self._data.order.car.mileage),
+                type="number",
+                compact=True,
+            )
+        if self._can_update:
+            yield Label("\n")
+            yield Button("Delete", id="delete", compact=True, variant="error")
 
     @on(Key)
     def _on_key(self, event: Key) -> None:
         if event.key == "escape" or event.key == "q":
             self.app.pop_screen()
+
+    @on(Button.Pressed, "#delete")
+    def _delete(self):
+        self.app.exit(self._data)

@@ -21,32 +21,32 @@ class AppCli:
             action=HelpMessage,
             message=lambda _: "\n".join(
                 [
+                    "Car Rental Management CLI with GPS tracking",
+                    "\n"
                     "cgps <command>",
                     "\n"
                     "options",
                     "  -h, --help                         show this help message and exit",
                     "\n"
                     "Usage:",
-                    "    cgps admin <command>             all admin commands require admin authentication",
-                    "    cgps admin login                 login as admin",
-                    "    cgps admin logout                logout from system",
-                    "    cgps admin gps list              list all gps devices",
-                    "    cgps admin gps register          register a new gps device",
-                    "    cgps admin car list              list all cars",
-                    "    cgps admin car register          register a new car",
-                    "    cgps admin car update            update general information of a car",
-                    "    cgps admin car return            make a car available for renting",
-                    "    cgps admin car report            view cars tracking report in realtime",
-                    "    cgps admin order list            view all rent orders",
-                    "\n"
                     "    cgps customer <command>          Most customer commands require customer authentication",
                     "    cgps customer register           register a new customer. [no authentication required]",
                     "    cgps customer login              login as customer",
                     "    cgps customer logout             logout from system",
-                    "    cgps customer info view          view customer information",
-                    "    cgps customer info update        update general information",
-                    "    cgps customer car rent           rent a car",
-                    "    cgps customer order list         view all rent orders",
+                    "    cgps customer info               view and update customer information",
+                    "    cgps customer rent               rent a car",
+                    "    cgps customer order              view all rent orders",
+                    "\n"
+                    "    cgps admin <command>             all admin commands require admin authentication",
+                    "    cgps admin login                 login as admin",
+                    "    cgps admin logout                logout from system",
+                    "    cgps admin gps                   view all and update gps devices",
+                    "    cgps admin gps register          register a new gps device",
+                    "    cgps admin car                   view all and update cars",
+                    "    cgps admin car register          register a new car",
+                    "    cgps admin car return            make a car available for renting",
+                    "    cgps admin car report            view cars tracking report in realtime",
+                    "    cgps admin order                 view all and update rent orders",
                 ]
             ),
         )

@@ -8,10 +8,10 @@ from cgps.core.services.admin_auth_service import AdminAuthService
 from cgps.core.services.customer_auth_service import CustomerAuthService
 from cgps.core.services.car_service import CarService
 from cgps.core.services.customer_service import CustomerService
+from cgps.core.services.gps_service import GpsService
 from cgps.core.services.order_service import OrderService
 from cgps.ui.info_form_ui import InfoFormUi
 from cgps.ui.register_ui import RegisterUi
-from cgps.ui.info_ui import InfoUi
 from cgps.ui.login_ui import LoginUi
 from cgps.ui.order_list_ui import OrderListUi
 from cgps.ui.rent_ui import RentUi
@@ -52,11 +52,13 @@ class Container(containers.DeclarativeContainer):
         CarService,
         database=database,
     )
-
+    gps_service = providers.Factory(
+        GpsService,
+        database=database,
+    )
 
     # UI Factory
     login_ui = providers.Factory(LoginUi)
-    info_ui = providers.Factory(InfoUi)
     register_ui = providers.Factory(RegisterUi)
     info_form_ui = providers.Factory(InfoFormUi)
     order_list_ui = providers.Factory(OrderListUi)
@@ -67,6 +69,10 @@ class Container(containers.DeclarativeContainer):
         AdminCli,
         auth_service=admin_auth_service,
         login_ui=login_ui,
+        order_list_ui=order_list_ui,
+        order_service=order_service,
+        car_service=car_service,
+        gps_service=gps_service,
     )
     customer_cli = providers.Factory(
         CustomerCli,
@@ -76,7 +82,6 @@ class Container(containers.DeclarativeContainer):
         car_service=car_service,
         login_ui=login_ui,
         register_ui=register_ui,
-        info_ui=info_ui,
         info_form_ui=info_form_ui,
         order_list_ui=order_list_ui,
         rent_ui=rent_ui,

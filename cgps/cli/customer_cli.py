@@ -10,7 +10,6 @@ from cgps.core.services.customer_service import CustomerService
 from cgps.core.services.order_service import OrderService
 from cgps.ui.info_form_ui import InfoFormUi
 from cgps.ui.register_ui import RegisterUi
-from cgps.ui.info_ui import InfoUi
 from cgps.ui.login_ui import LoginUi
 from cgps.ui.order_list_ui import OrderListUi
 from cgps.ui.rent_ui import RentUi
@@ -26,13 +25,11 @@ class CustomerCli(UserCli):
         login_ui: LoginUi,
         register_ui: RegisterUi,
         info_form_ui: InfoFormUi,
-        info_ui: InfoUi,
         order_list_ui: OrderListUi,
         rent_ui: RentUi,
     ):
         super().__init__(auth_service, login_ui)
         self._register_ui = register_ui
-        self._info_ui = info_ui
         self._info_form_ui = info_form_ui
         self._order_list_ui = order_list_ui
         self._rent_ui = rent_ui
@@ -56,29 +53,14 @@ class CustomerCli(UserCli):
         logout = cmd.add_parser("logout", help="logout from system")
         logout.set_defaults(func=lambda _: self._logout())
 
-        info = cmd.add_parser("info", help="view, update customer information")
-        info.set_defaults(func=lambda _: info.print_help())
-        info_cmd = info.add_subparsers(
-            dest="cmd", title="Usage", metavar="info <command>"
-        )
-        info_view = info_cmd.add_parser("view", help="view customer information")
-        info_view.set_defaults(func=lambda _: self._info_view())
-        info_update = info_cmd.add_parser("update", help="update general information")
-        info_update.set_defaults(func=lambda _: self._info_update())
+        info = cmd.add_parser("info", help="view customer information")
+        info.set_defaults(func=lambda _: self._info_update())
 
-        car = cmd.add_parser("car", help="rent, return a car")
-        car.set_defaults(func=lambda _: car.print_help())
-        car_cmd = car.add_subparsers(dest="cmd", title="Usage", metavar="car <command>")
-        car_rent = car_cmd.add_parser("rent", help="rent a car")
+        car_rent = cmd.add_parser("rent", help="rent a car")
         car_rent.set_defaults(func=lambda _: self._rent_car())
 
-        order = cmd.add_parser("order", help="list, update orders")
-        order.set_defaults(func=lambda _: order.print_help())
-        order_cmd = order.add_subparsers(
-            dest="cmd", title="Usage", metavar="order <command>"
-        )
-        order_list = order_cmd.add_parser("list", help="view all rent orders")
-        order_list.set_defaults(func=lambda _: self._list_orders())
+        order = cmd.add_parser("order", help="view all rent orders")
+        order.set_defaults(func=lambda _: self._list_orders())
 
     @guest()
     def _register(self):
@@ -91,14 +73,9 @@ class CustomerCli(UserCli):
         print("Register successful")
 
     @logged_in()
-    def _info_view(self, user_id: int):
-        data = self._get_info(user_id)
-        self._info_ui.with_data(data).run()
-
-    @logged_in()
     def _info_update(self, user_id: int):
         data = self._get_info(user_id)
-        result = self._info_form_ui.with_data(data).run()
+        result = self._info_form_ui.with_data(data, can_update=True).run()
         if result is None:
             return
         if not self._customer_service.update_info(result):
@@ -118,14 +95,8 @@ class CustomerCli(UserCli):
 
     @logged_in()
     def _list_orders(self, user_id: int):
-        invoices = self._order_service.my_orders(user_id)
-        invoices_data = []
-        for invoice in invoices:
-            data = invoice.to_db()
-            data["order"] = invoice.order.to_db()
-            data["order"]["car"] = invoice.order.car.to_db()
-            invoices_data.append(data)
-        self._order_list_ui.with_data(invoices_data).run()
+        invoices = self._order_service.list(user_id)
+        self._order_list_ui.with_data(invoices, can_update=False).run()
 
     @logged_in()
     def _rent_car(self, user_id: int):

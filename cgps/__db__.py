@@ -1,7 +1,7 @@
 import argparse
 from dependency_injector.wiring import Provide, inject
 from pathlib import Path
-from cgps.core.container import Container
+from cgps.container import Container
 from cgps.core.database import Database
 
 
