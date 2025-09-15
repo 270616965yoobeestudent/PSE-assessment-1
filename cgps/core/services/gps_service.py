@@ -1,6 +1,9 @@
+from datetime import datetime
+import uuid
 from cgps.core.database import Database
 from cgps.core.models.tracking_device import TrackingDevice
 from cgps.core.services.auth_service import AuthService
+from cgps.core.utils import ISO_DT, only_keys, to_insert_column, to_update_column
 
 
 class GpsService:
@@ -15,4 +18,43 @@ class GpsService:
         return [TrackingDevice.from_row(d) for d in data]
 
     def register(self, device: TrackingDevice):
-        pass
+        now = datetime.now().strftime(ISO_DT)
+
+        device_data = device.to_db()
+        device_data = only_keys(
+            device_data,
+            [
+                "no",
+                "gsm_provider",
+                "gsm_no",
+                "created_at",
+                "updated_at",
+            ],
+        )
+        device_data.update(no=str(uuid.uuid4()), created_at=now, updated_at=now)
+        device_sql = f"INSERT INTO tracking_devices {to_insert_column(device_data)}"
+        self._database.begin()
+        self._database.execute(device_sql, device_data)
+        self._database.commit()
+        return True
+
+    def update(self, device: TrackingDevice) -> bool:
+        now = datetime.now().strftime(ISO_DT)
+        device_data = device.to_db()
+        device_data = only_keys(
+            device_data,
+            [
+                "no",
+                "gsm_provider",
+                "gsm_no",
+                "updated_at",
+            ],
+        )
+        device_data.update(updated_at=now)
+        device_sql = (
+            f"UPDATE tracking_devices SET {to_update_column(device_data)} WHERE no=:no"
+        )
+        self._database.begin()
+        self._database.execute(device_sql, device_data)
+        self._database.commit()
+        return True

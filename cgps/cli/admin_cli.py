@@ -7,6 +7,8 @@ from cgps.core.services.admin_auth_service import AdminAuthService
 from cgps.core.services.car_service import CarService
 from cgps.core.services.gps_service import GpsService
 from cgps.core.services.order_service import OrderService
+from cgps.ui.gps_list_ui import GpsListUi
+from cgps.ui.gps_register_ui import GpsRegisterUi
 from cgps.ui.login_ui import LoginUi
 from cgps.ui.order_list_ui import OrderListUi
 
@@ -17,6 +19,8 @@ class AdminCli(UserCli):
         auth_service: AdminAuthService,
         login_ui: LoginUi,
         order_list_ui: OrderListUi,
+        gps_list_ui: GpsListUi,
+        gps_register_ui: GpsRegisterUi,
         order_service: OrderService,
         car_service: CarService,
         gps_service: GpsService,
@@ -26,6 +30,8 @@ class AdminCli(UserCli):
         self._car_service = car_service
         self._gps_service = gps_service
         self._order_list_ui = order_list_ui
+        self._gps_list_ui = gps_list_ui
+        self._gps_register_ui = gps_register_ui
 
     def run(self, role: _SubParsersAction):
         admin: ArgumentParser = role.add_parser("admin", help="admin commands")
@@ -50,14 +56,10 @@ class AdminCli(UserCli):
         car_cmd = car.add_subparsers(dest="cmd", title="Usage", metavar="car <command>")
         car_register = car_cmd.add_parser("register", help="register a new car")
         car_register.set_defaults(func=lambda _: self._car_register())
-        car_update = car_cmd.add_parser(
-            "update", help="update general information of a car"
-        )
-        car_update.set_defaults(func=lambda _: self._car_update())
-        car_return = car_cmd.add_parser(
-            "return", help="make a car available for renting"
-        )
-        car_return.set_defaults(func=lambda _: self._car_return())
+        car_update = car_cmd.add_parser("pick-up", help="customer pick a car up")
+        car_update.set_defaults(func=lambda _: self._car_pick_up())
+        car_return = car_cmd.add_parser("drop-off", help="customer drop a car off")
+        car_return.set_defaults(func=lambda _: self._car_drop_off())
         car_report = car_cmd.add_parser(
             "report", help="view cars tracking report in realtime"
         )
@@ -69,11 +71,23 @@ class AdminCli(UserCli):
     @logged_in()
     def _gps_list(self, user_id: int):
         data = self._gps_service.list()
-        pass
+        data = self._gps_list_ui.with_data(data).run()
+        if data is None:
+            return
+        if not self._gps_service.update(data):
+            print("Update gps failed")
+            return
+        print("Update gps successful")
 
     @logged_in()
     def _gps_register(self, user_id: int):
-        pass
+        data = self._gps_register_ui.run()
+        if data is None:
+            return
+        if not self._gps_service.register(data):
+            print("Register gps failed")
+            return
+        print("Register gps successful")
 
     @logged_in()
     def _car_list(self, user_id: int):
@@ -84,11 +98,11 @@ class AdminCli(UserCli):
         pass
 
     @logged_in()
-    def _car_update(self, user_id: int):
+    def _car_pick_up(self, user_id: int):
         pass
 
     @logged_in()
-    def _car_return(self, user_id: int):
+    def _car_drop_off(self, user_id: int):
         pass
 
     @logged_in()
@@ -102,12 +116,9 @@ class AdminCli(UserCli):
         if data is None:
             return
         confirm = questionary.path("Are you sure to delete this order? (y/N)").ask()
-        if confirm != 'y':
+        if confirm != "y":
             return
         if not self._order_service.soft_delete(data.order.id):
             print("Delete order failed")
             return
         print("Delete order successful")
-
-
-

@@ -36,7 +36,9 @@ CREATE TABLE driver_licenses (
 CREATE TABLE tracking_devices (
   no              TEXT PRIMARY KEY,
   gsm_provider    TEXT,
-  gsm_no          TEXT
+  gsm_no          TEXT,
+  created_at      TEXT,
+  updated_at      TEXT
 );
 
 CREATE TABLE admins (
