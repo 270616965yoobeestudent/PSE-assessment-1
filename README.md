@@ -139,24 +139,21 @@ cgps admin login
 # password: Admin@123
 ```
 
-## Build a self-contained .pyz
+## Build a self-contained .pex
 
 This app can be bundled as a zipapp that includes third‑party dependencies.
 
 1. Install pex:
-
    ```bash
    python3 -m pip install pex     
    ```
 
 2. Build:
-
    ```bash
    sh scripts/build_pex.sh
    ```
 
 3. Run:
-
    ```bash
    dist/cgps.pex -h
    ```
