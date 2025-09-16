@@ -52,39 +52,25 @@
 - OS: macOS/Linux/Windows with a terminal that supports Textual.
 
 ## Setup
-1) Create and activate a virtual environment
-
-macOS/Linux
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-Windows (PowerShell)
-```powershell
-py -m venv .venv
-.venv\\Scripts\\Activate.ps1
-```
-
-2) Install dependencies (and console scripts)
+1) Install dependencies (and console scripts)
 ```bash
 pip install -e .        # preferred; installs `cgps` and `cgps-db`
 # or
 pip install -r requirements.txt
 ```
 
+2) Initialize the Database
+```bash
+cgps-db run 
+```
+- Applies `cgps/db.sql`, then seeds with `cgps/seed.sql`.
+- Produces or resets the SQLite file configured in `config.yml`.
+
 3) Configure (optional)
 - Edit `config.yml` to change:
   - `database.path`: SQLite file location
   - `app.keychain_service`: name used for secure credential storage
   - `admin.*` and `customer.*`: password salts and JWT secret keys
-
-## Initialize the Database
-```bash
-cgps-db run
-```
-- Applies `cgps/db.sql`, then seeds with `cgps/seed.sql`.
-- Produces or resets the SQLite file configured in `config.yml`.
 
 ## Mock Accounts
 - Seeded users for quick login (passwords are plain text here; hashes in `seed.sql` are `SHA-256(salt || password)` using salts from `config.yml`).
@@ -142,13 +128,6 @@ Quick login example
 cgps admin login
 # username: admin1
 # password: Admin@123
-```
-
-## Running Without Installing
-If you only installed requirements:
-```bash
-python -m cgps          # main CLI
-python -m cgps.__db__   # DB CLI
 ```
 
 ## Textual UI Tips
