@@ -12,7 +12,7 @@ from cgps.core.utils import to_bool, to_date, to_decimal, to_dt
 @dataclass
 class Car(DBModel):
     id: int
-    plate_license: str
+    plate_license: Optional[str] = None
     engine_number: Optional[str] = None
     fuel_type: Optional[str] = None
     make: Optional[str] = None

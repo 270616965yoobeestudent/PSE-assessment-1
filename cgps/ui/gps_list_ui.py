@@ -16,7 +16,7 @@ class GpsListUi(App):
     Horizontal { height: auto; }
     """
 
-    def with_data(self, data: TrackingDevice):
+    def with_data(self, data: list[TrackingDevice]):
         self._data = data
         return self
 
@@ -25,7 +25,7 @@ class GpsListUi(App):
 
 
 class _GpsListTableScren(Screen):
-    def __init__(self, data: TrackingDevice):
+    def __init__(self, data: list[TrackingDevice]):
         super().__init__()
         self._data = data
 

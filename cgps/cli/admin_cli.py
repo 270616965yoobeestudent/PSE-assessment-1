@@ -7,6 +7,7 @@ from cgps.core.services.admin_auth_service import AdminAuthService
 from cgps.core.services.car_service import CarService
 from cgps.core.services.gps_service import GpsService
 from cgps.core.services.order_service import OrderService
+from cgps.ui.car_list_ui import CarListUi
 from cgps.ui.customer_search_ui import CustomerSearchUi
 from cgps.ui.gps_list_ui import GpsListUi
 from cgps.ui.gps_register_ui import GpsRegisterUi
@@ -23,6 +24,7 @@ class AdminCli(UserCli):
         gps_list_ui: GpsListUi,
         gps_register_ui: GpsRegisterUi,
         customer_search_ui: CustomerSearchUi,
+        car_list_ui: CarListUi,
         order_service: OrderService,
         car_service: CarService,
         gps_service: GpsService,
@@ -35,6 +37,7 @@ class AdminCli(UserCli):
         self._gps_list_ui = gps_list_ui
         self._gps_register_ui = gps_register_ui
         self._customer_search_ui = customer_search_ui
+        self._car_list_ui = car_list_ui
 
     def run(self, role: _SubParsersAction):
         admin: ArgumentParser = role.add_parser("admin", help="admin commands")
@@ -81,7 +84,7 @@ class AdminCli(UserCli):
 
     @logged_in()
     def _gps_list(self, user_id: int):
-        data = self._gps_service.list()
+        data = self._gps_service.all()
         data = self._gps_list_ui.with_data(data).run()
         if data is None:
             return
@@ -102,11 +105,31 @@ class AdminCli(UserCli):
 
     @logged_in()
     def _car_list(self, user_id: int):
-        pass
+        data = self._car_service.all()
+        result = self._car_list_ui.with_data(data, "update").run()
+        if result is None:
+            return
+        (action, car) = result
+        if action == "update":
+            if not self._car_service.update(car):
+                print("Update car failed")
+                return
+        if action == "report":
+            pass
+        print("Update car successful")
 
     @logged_in()
     def _car_register(self, user_id: int):
-        pass
+        data = self._car_service.all()
+        result = self._car_list_ui.with_data(data, "register").run()
+        if result is None:
+            return
+        (action, car) = result
+        if action == "update":
+            if not self._car_service.register(car):
+                print("Register car failed")
+                return
+        print("Register car successful")
 
     @logged_in()
     def _car_report(self, user_id: int):

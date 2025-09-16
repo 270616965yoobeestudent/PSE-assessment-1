@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 import uuid
 from cgps.core.database import Database
 from cgps.core.models.tracking_device import TrackingDevice
@@ -12,9 +13,29 @@ class GpsService:
     ):
         self._database = database
 
-    def list(self):
+    def all(self) -> list[TrackingDevice]:
         data = self._database.fetchall("SELECT * FROM tracking_devices")
         return [TrackingDevice.from_row(d) for d in data]
+
+    def get_available(self, car_id: Optional[int]) -> list[TrackingDevice]:
+        where_clause = "WHERE tracking_device_id IS NOT NULL"
+        params = {}
+
+        if car_id is not None:
+            where_clause += " AND id != :car_id"
+            params["car_id"] = car_id
+
+        query = f"""
+            SELECT *
+            FROM tracking_devices
+            WHERE id NOT IN (
+                SELECT tracking_device_id
+                FROM cars
+                {where_clause}
+            )
+        """
+        rows = self._database.fetchall(query, params)
+        return [TrackingDevice.from_row(d) for d in rows]
 
     def register(self, device: TrackingDevice):
         now = datetime.now().strftime(ISO_DT)

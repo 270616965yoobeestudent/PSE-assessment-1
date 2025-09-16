@@ -10,6 +10,7 @@ from cgps.core.services.car_service import CarService
 from cgps.core.services.customer_service import CustomerService
 from cgps.core.services.gps_service import GpsService
 from cgps.core.services.order_service import OrderService
+from cgps.ui.car_list_ui import CarListUi
 from cgps.ui.customer_search_ui import CustomerSearchUi
 from cgps.ui.gps_list_ui import GpsListUi
 from cgps.ui.gps_register_ui import GpsRegisterUi
@@ -71,6 +72,10 @@ class Container(containers.DeclarativeContainer):
     customer_search_ui = providers.Factory(
         CustomerSearchUi, customer_service=customer_service
     )
+    car_list_ui = providers.Factory(
+        CarListUi,
+        gps_service=gps_service,
+    )
 
     # CLI Factory
     admin_cli = providers.Factory(
@@ -81,6 +86,7 @@ class Container(containers.DeclarativeContainer):
         gps_list_ui=gps_list_ui,
         gps_register_ui=gps_register_ui,
         customer_search_ui=customer_search_ui,
+        car_list_ui=car_list_ui,
         order_service=order_service,
         car_service=car_service,
         gps_service=gps_service,
