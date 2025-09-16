@@ -39,17 +39,20 @@ class _GpsListTableScren(Screen):
             "No",
             "GSM Provider",
             "GSM number",
+            "Created at",
         )
         rows = []
         for item in self._data:
             id = item.id
             gsm_provider = item.gsm_provider
             gsm_no = item.gsm_no
+            created_at = item.created_at
             rows.append(
                 (
                     id,
                     gsm_provider,
                     gsm_no,
+                    created_at
                 )
             )
         table.add_rows(rows)

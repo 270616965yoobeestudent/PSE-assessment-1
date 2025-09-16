@@ -69,7 +69,7 @@ class _GpsRegisterDetailScren(Screen):
             return
 
         gps = TrackingDevice(
-            no="",
+            id=0,
             gsm_provider=self.query_one("#gsm_provider", Input).value,
             gsm_no=self.query_one("#gsm_number", Input).value,
         )
