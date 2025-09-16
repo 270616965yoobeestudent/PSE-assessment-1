@@ -3,3 +3,4 @@ __pycache__
 *.db
 build
 dist
+*.DS_Storegit a
