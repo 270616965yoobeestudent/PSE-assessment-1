@@ -3,9 +3,8 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
-from sympy import Order
-
 from cgps.core.models.db_model import DBModel
+from cgps.core.models.order import Order
 from cgps.core.utils import to_decimal, to_dt
 
 

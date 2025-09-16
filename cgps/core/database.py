@@ -51,4 +51,3 @@ class Database:
     def migrate_from_file(self, path: Path) -> None:
         sql_text = path.read_text(encoding="utf-8")
         self.connection().executescript(sql_text)
-        self.close()

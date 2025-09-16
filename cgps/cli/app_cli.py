@@ -1,13 +1,15 @@
 import argparse
 from cgps.cli.admin_cli import AdminCli
 from cgps.cli.customer_cli import CustomerCli
+from cgps.cli.database_cli import DatabaseCli
 from cgps.cli.help_message import HelpMessage
 
 
 class AppCli:
-    def __init__(self, admin: AdminCli, customer: CustomerCli):
-        self.admin = admin
-        self.customer = customer
+    def __init__(self, admin: AdminCli, customer: CustomerCli, database: DatabaseCli):
+        self._admin = admin
+        self._customer = customer
+        self._database = database
 
     def run(self):
         parser = argparse.ArgumentParser(
@@ -22,13 +24,10 @@ class AppCli:
             message=lambda _: "\n".join(
                 [
                     "Car Rental Management CLI with GPS tracking",
-                    "\n"
-                    "cgps <command>",
-                    "\n"
-                    "options",
+                    "\n" "cgps <command>",
+                    "\n" "options",
                     "  -h, --help                         show this help message and exit",
-                    "\n"
-                    "Usage:",
+                    "\n" "Usage:",
                     "    cgps customer <command>          Most customer commands require customer authentication",
                     "    cgps customer register           register a new customer. [no authentication required]",
                     "    cgps customer login              login as customer",
@@ -48,14 +47,19 @@ class AppCli:
                     "    cgps admin car report            view cars tracking report in realtime",
                     "    cgps admin order                 view all and update rent orders",
                     "    cgps admin order search          search customer orders",
+                    "\n"
+                    "    cgps db init                     initialize database"
                 ]
             ),
         )
         parser.set_defaults(func=lambda _: parser.print_help())
 
-        role = parser.add_subparsers(dest="role", title="Usage", metavar="cgps <command>")
-        self.admin.run(role)
-        self.customer.run(role)
+        role = parser.add_subparsers(
+            dest="role", title="Usage", metavar="cgps <command>"
+        )
+        self._admin.run(role)
+        self._customer.run(role)
+        self._database.run(role)
 
         args = parser.parse_args()
         args.func(args)
