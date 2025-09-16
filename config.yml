@@ -1,0 +1,14 @@
+database:
+  path: cgps.db
+
+app:
+  name: cgps
+  keychain_service: cgps-auth
+
+admin:
+  password_salt: e24ef161-2db4-498c-b8f9-b274010e14bf
+  jwt_secret_key: e24ae2ff-e49d-459f-b84e-e79a851b1a64
+
+customer:
+  password_salt: 7606b51f-da19-4f14-9f87-11259fbaeb24
+  jwt_secret_key: 7193da22-8fa3-4212-8e5a-d06a9ecc24f0
