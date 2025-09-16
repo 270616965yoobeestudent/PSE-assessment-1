@@ -7,15 +7,17 @@
   <em>CLI entrypoint and live GPS tracking table in the Textual UI</em>
 </div>
 
+## About cgps
+`cgps` stands for “`C`ar rental system with real‑time tracking `GPS`.” It is an end‑to‑end car‑rental platform that pairs operational workflows with continuous telemetry from IoT sensors and GPS/cellular hardware installed in every vehicle. The system streams rich signals—location and speed, engine on/off, fuel percentage and remaining litres or battery kWh, plus GPS/GSM signal strength—so fleet managers can monitor utilization, react quickly, and reduce operational risk. Beyond tracking, cgps supports the full rental lifecycle: customer registration and profile updates, selecting dates and vehicles, approvals, hand‑over and return, and invoicing/payments. A terminal‑native Textual UI delivers fast, accessible screens for both admin and customer flows, while services encapsulate business logic behind a dependency‑injected architecture that cleanly separates CLI, service, and persistence layers. SQLite makes local setup instant, and the repository ships with schema/seed scripts plus a realistic mock tracking generator to demo real‑time updates without physical devices. Together these pieces provide a compact, testable foundation for GPS‑aware fleet operations.
+
 ## Overview
 - Purpose: Manage a car rental business with admin and customer flows, and visualize real‑time GPS tracking for vehicles in a terminal UI.
 - Tech stack: Python (>= 3.13.5), SQLite, dependency‑injector, Textual (TUI), Questionary, Keyring, PyJWT.
-- Entrypoints: `cgps` (main CLI) and `cgps-db` (database CLI).
+- Entrypoints: `cgps` (main CLI).
 
 ## Repository Structure
 - `cgps/`: Application package
   - `__main__.py`: CLI bootstrap (`cgps` entrypoint)
-  - `__db__.py`: Database CLI (`cgps-db` entrypoint)
   - `container.py`: Dependency injection container and wiring
   - `db.sql`, `seed.sql`: Schema and seed data
   - `cli/`: Command‑line commands
@@ -34,11 +36,13 @@
 - `config.yml`: App configuration (DB path, salts, secrets)
 - `pyproject.toml`: Packaging and console scripts
 - `requirements.txt`: Runtime dependencies
+- `scripts`: Build script
+  - `build_pex.sh`: Build .pex file into `dist/`
 
 ## How It Works
 - Dependency Injection: `container.py` wires services, UIs, and CLIs via `dependency_injector`. `cgps.__main__` resolves `AppCli` and runs it; the DB connection is closed afterward.
 - Storage: SQLite database at the path from `config.yml` (default `cgps.db`).
-- Database Lifecycle: `cgps-db run` executes `db.sql` then `seed.sql` to create tables and seed sample data.
+- Database Lifecycle: `cgps db init` executes `db.sql` then `seed.sql` to create tables and seed sample data.
 - Admin Flow (via `cgps admin`):
   - Manage cars and GPS devices (list/update/register) in Textual TUIs.
   - View orders and search customers.
@@ -54,14 +58,14 @@
 ## Setup
 1) Install dependencies (and console scripts)
 ```bash
-pip install -e .        # preferred; installs `cgps` and `cgps-db`
+pip install -e .        # preferred; installs `cgps`
 # or
 pip install -r requirements.txt
 ```
 
 2) Initialize the Database
 ```bash
-cgps-db run 
+cgps db init  
 ```
 - Applies `cgps/db.sql`, then seeds with `cgps/seed.sql`.
 - Produces or resets the SQLite file configured in `config.yml`.
@@ -71,6 +75,11 @@ cgps-db run
   - `database.path`: SQLite file location
   - `app.keychain_service`: name used for secure credential storage
   - `admin.*` and `customer.*`: password salts and JWT secret keys
+  
+2) Run
+```bash
+cgps -h  
+```
 
 ## Mock Accounts
 - Seeded users for quick login (passwords are plain text here; hashes in `seed.sql` are `SHA-256(salt || password)` using salts from `config.yml`).
@@ -130,6 +139,28 @@ cgps admin login
 # password: Admin@123
 ```
 
+## Build a self-contained .pyz
+
+This app can be bundled as a zipapp that includes third‑party dependencies.
+
+1. Install pex:
+
+   ```bash
+   python3 -m pip install pex     
+   ```
+
+2. Build:
+
+   ```bash
+   sh scripts/build_pex.sh
+   ```
+
+3. Run:
+
+   ```bash
+   dist/cgps.pex -h
+   ```
+
 ## Textual UI Tips
 - Navigation and actions are guided onscreen.
 - Common keys:
@@ -145,7 +176,7 @@ cgps admin login
 ## Troubleshooting
 - No `cgps` command after install: ensure you ran `pip install -e .` in an active venv and that your shell has the venv’s `bin` (or `Scripts`) on PATH.
 - Textual UI rendering issues: try a different terminal or disable exotic themes; ensure a Unicode/UTF‑8 locale.
-- Database errors: re‑initialize with `cgps-db run`, or delete the SQLite file configured in `config.yml` and rerun.
+- Database errors: re‑initialize with `cgps db init`, or delete the SQLite file configured in `config.yml` and rerun.
 
 ## Screenshots
 - Main menu

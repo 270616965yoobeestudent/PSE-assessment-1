@@ -5,4 +5,4 @@ pyjwt==2.10.1
 textual==6.1.0
 textual-dev==1.7.0
 questionary==2.1.1
-
+PyYAML==6.0.2

@@ -3,8 +3,8 @@ requires = ["setuptools >= 64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "car-rental"
-version = "0.1.0"
+name = "cgps"
+version = "0.2.0"
 description = "A car rental management system with real-time GPS tracking for vehicles."
 readme = "README.md"
 requires-python = ">=3.13.5"
@@ -17,6 +17,8 @@ dependencies = { file = ["requirements.txt"] }
 [tool.setuptools.packages.find]
 include = ["cgps*"]
 
+[tool.setuptools.package-data]
+cgps = ["*.sql", "config.yml"]
+
 [project.scripts]
 cgps = "cgps.__main__:main"
-cgps-db = "cgps.__db__:main"
