@@ -62,8 +62,10 @@ def to_insert_column(data: dict[str, any]) -> str:
     cols = list(data.keys())
     return f"({','.join(cols)}) VALUES ({','.join(':'+c for c in cols)})"
 
+
 def to_days(start: datetime, end: datetime) -> int:
     return math.ceil((end - start).total_seconds() / 86400)
+
 
 def count_days(start: datetime, end: datetime) -> Mapping[str, int]:
     total_days = to_days(start, end)
@@ -76,3 +78,12 @@ def count_days(start: datetime, end: datetime) -> Mapping[str, int]:
         else:
             weekdays += 1
     return {"weekdays": weekdays, "weekends": weekends}
+
+
+def calculate_age(birthdate: date) -> int:
+    today = date.today()
+    return (
+        today.year
+        - birthdate.year
+        - ((today.month, today.day) < (birthdate.month, birthdate.day))
+    )

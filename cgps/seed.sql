@@ -15,19 +15,19 @@ INSERT INTO admins (id, username, password) VALUES
 
 -- Passports
 INSERT INTO passports (id, no, country_code, gender, first_name, last_name, expired_at, created_at, updated_at) VALUES 
-(1, '68abd08a-fe27-43e0-95a1-6030468bfa39', 'NZ', 'F', 'Alice', 'Ng', '2030-12-31', '2025-08-01 09:00:00', '2025-08-01 09:00:00'),
-(2, '3e60fecf-0c11-4ca5-b16f-cfe8d04efe77', 'AU', 'M', 'Bob', 'Smith', '2031-12-31', '2025-08-01 09:00:00', '2025-08-01 09:00:00'),
-(3, '4bd9f9f8-e92a-4f37-b09d-977aff5ed017', 'NZ', 'M', 'Charlie', 'Brown', '2032-12-31', '2025-08-01 09:00:00', '2025-08-01 09:00:00'),
-(4, '346ec472-b709-4e04-b442-169e8230ee01', 'NZ', 'F', 'Diana', 'Lee', '2033-12-31', '2025-08-01 09:00:00', '2025-08-01 09:00:00'),
-(5, '52e33deb-bd9e-481f-95f2-6784e6d6501a', 'AU', 'M', 'Edward', 'Kim', '2034-12-31', '2025-08-01 09:00:00', '2025-08-01 09:00:00');
+(1, 'AC000001', 'NZ', 'F', 'Alice', 'Ng', '2030-12-31', '2025-08-01 09:00:00', '2025-08-01 09:00:00'),
+(2, 'AC000002', 'AU', 'M', 'Bob', 'Smith', '2031-12-31', '2025-08-01 09:00:00', '2025-08-01 09:00:00'),
+(3, 'AC000003', 'NZ', 'M', 'Charlie', 'Brown', '2032-12-31', '2025-08-01 09:00:00', '2025-08-01 09:00:00'),
+(4, 'AC000004', 'NZ', 'F', 'Diana', 'Lee', '2033-12-31', '2025-08-01 09:00:00', '2025-08-01 09:00:00'),
+(5, 'AC000005', 'AU', 'M', 'Edward', 'Kim', '2034-12-31', '2025-08-01 09:00:00', '2025-08-01 09:00:00');
 
 -- Driver Licenses
 INSERT INTO driver_licenses (id, no, country_code, expired_at, created_at, updated_at) VALUES 
-(1, '2afd6102-3f55-476b-826d-0a0f0c32958b', 'NZ', '2030-06-30', '2025-08-01 09:00:00', '2025-08-01 09:00:00'),
-(2, 'c415142a-9140-4574-95e3-70df87c975a1', 'AU', '2031-06-30', '2025-08-01 09:00:00', '2025-08-01 09:00:00'),
-(3, 'ab4b14d6-b5ac-48e0-b968-cb079dfd6c90', 'NZ', '2032-06-30', '2025-08-01 09:00:00', '2025-08-01 09:00:00'),
-(4, 'c515acda-3c56-4a48-8a36-0e4571d44ccb', 'NZ', '2033-06-30', '2025-08-01 09:00:00', '2025-08-01 09:00:00'),
-(5, '54c1727a-7e18-47ea-99e5-64f6e3953067', 'AU', '2034-06-30', '2025-08-01 09:00:00', '2025-08-01 09:00:00');
+(1, 'DV000001', 'NZ', '2030-06-30', '2025-08-01 09:00:00', '2025-08-01 09:00:00'),
+(2, 'DV000002', 'AU', '2031-06-30', '2025-08-01 09:00:00', '2025-08-01 09:00:00'),
+(3, 'DV000003', 'NZ', '2032-06-30', '2025-08-01 09:00:00', '2025-08-01 09:00:00'),
+(4, 'DV000004', 'NZ', '2033-06-30', '2025-08-01 09:00:00', '2025-08-01 09:00:00'),
+(5, 'DV000005', 'AU', '2034-06-30', '2025-08-01 09:00:00', '2025-08-01 09:00:00');
 
 -- Tracking Devices
 INSERT INTO tracking_devices (id, gsm_provider, gsm_no, created_at, updated_at) VALUES 
@@ -141,7 +141,7 @@ INSERT INTO orders (id, customer_id, car_id, started_at, ended_at, receive_at, r
 INSERT INTO invoices (id, order_id, amount, paid_amount, paid_at, created_at, updated_at) VALUES 
 (1, 1, 150, 150, '2025-08-08 18:00:00', '2025-08-08 18:00:00', '2025-08-08 18:00:00');
 INSERT INTO orders (id, customer_id, car_id, started_at, ended_at, receive_at, return_at, total_day, total_weekday_amount, total_weekend_amount, total_amount, created_at, updated_at, rejected_at, approved_at) VALUES 
-(2, 1, 2, '2025-08-11 19:00:00', '2025-08-13 18:00:00', '2025-08-11 19:00:00', '2025-08-13 18:00:00', 2, 110, 0, 110, '2025-08-11 19:00:00', '2025-08-13 18:00:00', '2025-08-08 18:00:00', NULL);
+(2, 1, 2, '2025-08-11 19:00:00', '2025-08-13 18:00:00', NULL, NULL, 2, 110, 0, 110, '2025-08-11 19:00:00', '2025-08-13 18:00:00', '2025-08-08 18:00:00', NULL);
 INSERT INTO invoices (id, order_id, amount, paid_amount, paid_at, created_at, updated_at) VALUES 
 (2, 2, 110, 110, NULL, '2025-08-13 18:00:00', '2025-08-13 18:00:00');
 INSERT INTO orders (id, customer_id, car_id, started_at, ended_at, receive_at, return_at, total_day, total_weekday_amount, total_weekend_amount, total_amount, created_at, updated_at, rejected_at, approved_at) VALUES 
@@ -153,7 +153,7 @@ INSERT INTO orders (id, customer_id, car_id, started_at, ended_at, receive_at, r
 INSERT INTO invoices (id, order_id, amount, paid_amount, paid_at, created_at, updated_at) VALUES 
 (4, 4, 75, 75, '2025-08-05 18:00:00', '2025-08-05 18:00:00', '2025-08-05 18:00:00');
 INSERT INTO orders (id, customer_id, car_id, started_at, ended_at, receive_at, return_at, total_day, total_weekday_amount, total_weekend_amount, total_amount, created_at, updated_at, rejected_at, approved_at) VALUES 
-(5, 4, 8, '2025-08-16 19:00:00', '2025-08-21 18:00:00', '2025-08-16 19:00:00', '2025-08-21 18:00:00', 5, 425, 0, 425, '2025-08-16 19:00:00', '2025-08-21 18:00:00', NULL, NULL);
+(5, 4, 8, '2025-08-16 19:00:00', '2025-08-21 18:00:00', NULL, NULL, 5, 425, 0, 425, '2025-08-16 19:00:00', '2025-08-21 18:00:00', NULL, NULL);
 INSERT INTO invoices (id, order_id, amount, paid_amount, paid_at, created_at, updated_at) VALUES 
 (5, 5, 425, 425, '2025-08-21 18:00:00', '2025-08-21 18:00:00', '2025-08-21 18:00:00');
 COMMIT;

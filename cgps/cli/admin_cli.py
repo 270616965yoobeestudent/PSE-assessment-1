@@ -7,6 +7,7 @@ from cgps.core.services.admin_auth_service import AdminAuthService
 from cgps.core.services.car_service import CarService
 from cgps.core.services.gps_service import GpsService
 from cgps.core.services.order_service import OrderService
+from cgps.ui.customer_search_ui import CustomerSearchUi
 from cgps.ui.gps_list_ui import GpsListUi
 from cgps.ui.gps_register_ui import GpsRegisterUi
 from cgps.ui.login_ui import LoginUi
@@ -21,6 +22,7 @@ class AdminCli(UserCli):
         order_list_ui: OrderListUi,
         gps_list_ui: GpsListUi,
         gps_register_ui: GpsRegisterUi,
+        customer_search_ui: CustomerSearchUi,
         order_service: OrderService,
         car_service: CarService,
         gps_service: GpsService,
@@ -32,6 +34,7 @@ class AdminCli(UserCli):
         self._order_list_ui = order_list_ui
         self._gps_list_ui = gps_list_ui
         self._gps_register_ui = gps_register_ui
+        self._customer_search_ui = customer_search_ui
 
     def run(self, role: _SubParsersAction):
         admin: ArgumentParser = role.add_parser("admin", help="admin commands")
@@ -66,11 +69,11 @@ class AdminCli(UserCli):
 
         order = cmd.add_parser("order", help="view all and update rent orders")
         order.set_defaults(func=lambda _: self._order_list())
-        order_cmd = order.add_subparsers(dest="cmd", title="Usage", metavar="order <command>")
-        order_pick_up = order_cmd.add_parser("pick-up", help="customer pick a car up")
-        order_pick_up.set_defaults(func=lambda _: self._order_pick_up())
-        order_drop_off = order_cmd.add_parser("drop-off", help="customer drop a car off")
-        order_drop_off.set_defaults(func=lambda _: self._order_drop_off())
+        order_cmd = order.add_subparsers(
+            dest="cmd", title="Usage", metavar="order <command>"
+        )
+        order_search = order_cmd.add_parser("search", help="search customer orders")
+        order_search.set_defaults(func=lambda _: self._order_search())
 
     @logged_in()
     def _customer_list(self, user_id: int):
@@ -110,21 +113,25 @@ class AdminCli(UserCli):
         pass
 
     @logged_in()
-    def _order_pick_up(self, user_id: int):
-        pass
-
-    @logged_in()
-    def _order_drop_off(self, user_id: int):
-        pass
+    def _order_search(self, user_id: int):
+        result = self._customer_search_ui.run()
+        if result is None:
+            return
+        invoices = self._order_service.list(customer_id=result.id)
+        result = self._order_list_ui.with_data(invoices, flow="manage").run()
+        self._handle_order_manage(result)
 
     @logged_in()
     def _order_list(self, user_id: int):
         invoices = self._order_service.list()
-        result = self._order_list_ui.with_data(invoices, can_update=True).run()
+        result = self._order_list_ui.with_data(invoices, flow="manage").run()
+        self._handle_order_manage(result)
+
+    def _handle_order_manage(self, result):
         if result is None:
             return
         (action, data) = result
-        if (action == 'reject'):
+        if action == "reject":
             confirm = questionary.path("Are you sure to reject this order? (y/N)").ask()
             if confirm != "y":
                 return
@@ -132,19 +139,43 @@ class AdminCli(UserCli):
                 print("Reject order failed")
                 return
             print("Reject order successful")
-        if (action == 'approve'):
-            confirm = questionary.path("Are you sure to approve this order? (y/N)").ask()
+        if action == "approve":
+            confirm = questionary.path(
+                "Are you sure to approve this order? (y/N)"
+            ).ask()
             if confirm != "y":
                 return
             if not self._order_service.approve(data.order.id):
                 print("Approve order failed")
                 return
             print("Approve order successful")
-        if (action == 'paid'):
-            confirm = questionary.path("Are you sure to make payment for this order? (y/N)").ask()
+        if action == "paid":
+            confirm = questionary.path(
+                "Are you sure to make payment for this order? (y/N)"
+            ).ask()
             if confirm != "y":
                 return
             if not self._order_service.paid(data.id):
                 print("Payment failed")
                 return
             print("Payment successful")
+        if action == "pick-up":
+            confirm = questionary.path(
+                "Are you sure to pick up a car for this order? (y/N)"
+            ).ask()
+            if confirm != "y":
+                return
+            if not self._order_service.pick_up(data.id):
+                print("Pick up a car failed")
+                return
+            print("Pick up a car successful")
+        if action == "drop-off":
+            confirm = questionary.path(
+                "Are you sure to drop off a car for this order? (y/N)"
+            ).ask()
+            if confirm != "y":
+                return
+            if not self._order_service.drop_off(data.id):
+                print("Drop off a car failed")
+                return
+            print("Drop off a car successful")

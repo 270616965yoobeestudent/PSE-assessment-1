@@ -156,3 +156,29 @@ class OrderService:
         self._database.execute(invoice_sql, {"id": invoice_id, **invoice_data})
         self._database.commit()
         return True
+
+    def pick_up(self, order_id: int) -> bool:
+        now = datetime.now().strftime(ISO_DT)
+
+        self._database.begin()
+        order_data = {
+            "receive_at": now,
+            "updated_at": now,
+        }
+        order_sql = f"UPDATE orders SET {to_update_column(order_data)} WHERE id=:id"
+        self._database.execute(order_sql, {"id": order_id, **order_data})
+        self._database.commit()
+        return True
+
+    def drop_off(self, order_id: int) -> bool:
+        now = datetime.now().strftime(ISO_DT)
+
+        self._database.begin()
+        order_data = {
+            "return_at": now,
+            "updated_at": now,
+        }
+        order_sql = f"UPDATE orders SET {to_update_column(order_data)} WHERE id=:id"
+        self._database.execute(order_sql, {"id": order_id, **order_data})
+        self._database.commit()
+        return True

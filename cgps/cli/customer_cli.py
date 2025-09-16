@@ -96,7 +96,7 @@ class CustomerCli(UserCli):
     @logged_in()
     def _list_orders(self, user_id: int):
         invoices = self._order_service.list(user_id)
-        self._order_list_ui.with_data(invoices, can_update=False).run()
+        self._order_list_ui.with_data(invoices, flow="customer").run()
 
     @logged_in()
     def _rent_car(self, user_id: int):

@@ -1,9 +1,10 @@
 from datetime import datetime
+from typing import Optional
 from cgps.core.database import Database
 from cgps.core.models.customer import Customer
 from cgps.core.models.driver_license import DriverLicense
 from cgps.core.models.passport import Passport
-from cgps.core.utils import ISO_DT, only_keys, to_update_column
+from cgps.core.utils import ISO_DT, only_keys, strip_prefix, to_update_column
 
 
 class CustomerService:
@@ -28,17 +29,57 @@ class CustomerService:
         customer.driver_license = license
         return customer
 
-    def list(self) -> list[Customer]:
-        data = self._database.fetchall("SELECT * FROM customers")
-        return [Customer.from_row(d) for d in data]
-    
-    def get_user_by_passport(self, passport_no: str) -> Customer:
-        customer_data = self._database.fetchone(
-            "SELECT * FROM customers WHERE passport_no = ?", (passport_no,)
-        )
-        if customer_data is None:
-            return None
-        return Customer.from_row(customer_data)
+    def search_users(
+        self,
+        passport_no: Optional[str],
+        first_name: Optional[str],
+        last_name: Optional[str],
+    ) -> list[Customer]:
+        filters = []
+        params = {}
+
+        if passport_no and passport_no != "":
+            filters.append("p.no LIKE :passport_no")
+            params["passport_no"] = f"%{passport_no}%"
+
+        if first_name and first_name != "":
+            filters.append("p.first_name LIKE :first_name")
+            params["first_name"] = f"%{first_name}%"
+
+        if last_name and last_name != "":
+            filters.append("p.last_name LIKE :last_name")
+            params["last_name"] = f"%{last_name}%"
+
+        where_clause = " AND ".join(filters)
+        if where_clause:
+            where_clause = "WHERE " + where_clause
+
+        query = f"""
+            SELECT customers.*,
+                p.id AS passport__id,
+                p.no AS passport__no,
+                p.country_code AS passport__country_code,
+                p.gender AS passport__gender,
+                p.first_name AS passport__first_name,
+                p.last_name AS passport__last_name,
+                p.expired_at AS passport__expired_at,
+                p.created_at AS passport__created_at,
+                p.updated_at AS passport__updated_at
+            FROM customers
+            JOIN passports p ON customers.passport_id = p.id
+            {where_clause}
+        """
+
+        rows = self._database.fetchall(query, params)
+
+        invoices: list[Customer] = []
+        for row in rows:
+            passport_data = strip_prefix(row, "passport__")
+            customer: Customer = Customer.from_row(row)
+            passport: Passport = Passport.from_row(passport_data)
+            customer.passport = passport
+            invoices.append(customer)
+        return invoices
 
     def update_info(self, customer: Customer) -> Customer:
         now = datetime.now().strftime(ISO_DT)

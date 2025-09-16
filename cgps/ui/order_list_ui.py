@@ -19,25 +19,25 @@ class OrderListUi(App):
     Horizontal { height: auto; }
     """
 
-    def with_data(self, data: Invoice, can_update: bool):
+    def with_data(self, data: Invoice, flow: str):
         self._data = data
-        self._can_update = can_update
+        self._flow = flow
         return self
 
     def on_mount(self) -> None:
         self.push_screen(
             _OrderListTableScren(
                 self._data,
-                can_update=self._can_update,
+                flow=self._flow,
             )
         )
 
 
 class _OrderListTableScren(Screen):
-    def __init__(self, data: Invoice, can_update: bool = False):
+    def __init__(self, data: Invoice, flow: str):
         super().__init__()
         self._data = data
-        self._can_update = can_update
+        self._flow = flow
 
     def compose(self) -> ComposeResult:
         yield DataTable()
@@ -54,6 +54,8 @@ class _OrderListTableScren(Screen):
             "Total Price",
             "Payment",
             "Status",
+            "Actual pick up",
+            "Actual drop off",
             "Issue date",
         )
         rows = []
@@ -72,6 +74,8 @@ class _OrderListTableScren(Screen):
                 if item.order.approved_at is None and item.order.rejected_at is None
                 else "Approved" if item.order.approved_at else "Rejected"
             )
+            actual_pick_up = item.order.receive_at
+            actual_drop_off = item.order.return_at
             issue_date = item.created_at
             rows.append(
                 (
@@ -83,6 +87,8 @@ class _OrderListTableScren(Screen):
                     total_price,
                     payment,
                     status,
+                    actual_pick_up,
+                    actual_drop_off,
                     issue_date,
                 )
             )
@@ -99,16 +105,16 @@ class _OrderListTableScren(Screen):
         self.app.push_screen(
             _OrderListDetailScren(
                 data=self._data[row_index],
-                can_update=self._can_update,
+                flow=self._flow,
             )
         )
 
 
 class _OrderListDetailScren(Screen):
-    def __init__(self, data: Invoice, can_update: bool = False):
+    def __init__(self, data: Invoice, flow: str):
         super().__init__()
         self._data = data
-        self._can_update = can_update
+        self._flow = flow
 
     def compose(self) -> ComposeResult:
         yield Label("Order", classes="header")
@@ -144,6 +150,28 @@ class _OrderListDetailScren(Screen):
                 id="total_amount",
                 value=str(self._data.order.total_amount),
                 type="number",
+                compact=True,
+            )
+        with Horizontal():
+            yield Label("Actual pick up: ")
+            yield Input(
+                id="created_at",
+                value=(
+                    "-"
+                    if self._data.order.receive_at == None
+                    else self._data.order.receive_at.strftime(DATE_TIME_INPUT)
+                ),
+                compact=True,
+            )
+        with Horizontal():
+            yield Label("Actual drop off: ")
+            yield Input(
+                id="created_at",
+                value=(
+                    "-"
+                    if self._data.order.return_at == None
+                    else self._data.order.return_at.strftime(DATE_TIME_INPUT)
+                ),
                 compact=True,
             )
         with Horizontal():
@@ -207,18 +235,38 @@ class _OrderListDetailScren(Screen):
                 type="number",
                 compact=True,
             )
-        if self._can_update:
-            yield Label("\n")
+        yield Label("\n")
+        if self._flow == "manage" and self._data.order.return_at is None:
             with Horizontal():
                 if self._data.order.approved_at is None:
-                    yield Button("Approve", id="approve", compact=True, variant="success")
+                    yield Button(
+                        "Approve", id="approve", compact=True, variant="success"
+                    )
+                    yield Label(" ")
+                if self._data.paid_at is None and self._data.order.rejected_at is None:
+                    yield Button(
+                        "Mark Paid", id="paid", compact=True, variant="warning"
+                    )
+                    yield Label(" ")
+                if (
+                    self._data.order.receive_at is None
+                    and self._data.order.rejected_at is None
+                    and self._data.paid_at is not None
+                    and self._data.order.approved_at is not None
+                ):
+                    yield Button("Pick up", id="pick-up", compact=True)
+                    yield Label(" ")
+                if (
+                    self._data.order.return_at is None
+                    and self._data.order.receive_at is not None
+                ):
+                    yield Button("Drop off", id="drop-off", compact=True)
                     yield Label(" ")
                 if self._data.order.rejected_at is None:
                     yield Button("Reject", id="reject", compact=True, variant="error")
                     yield Label(" ")
-                if self._data.paid_at is None and self._data.order.rejected_at is None:
-                    yield Button("Already Paid", id="paid", compact=True)
-                    yield Label(" ")
+        if self._flow == "manage" and self._data.order.return_at is not None:
+            yield Label("This order has been completed", classes="header")
 
     @on(Key)
     def _on_key(self, event: Key) -> None:
@@ -236,3 +284,11 @@ class _OrderListDetailScren(Screen):
     @on(Button.Pressed, "#paid")
     def _paid(self):
         self.app.exit(("paid", self._data))
+
+    @on(Button.Pressed, "#pick-up")
+    def _pick_up(self):
+        self.app.exit(("pick-up", self._data))
+
+    @on(Button.Pressed, "#drop-off")
+    def _drop_off(self):
+        self.app.exit(("drop-off", self._data))

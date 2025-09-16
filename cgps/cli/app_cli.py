@@ -47,8 +47,7 @@ class AppCli:
                     "    cgps admin car register          register a new car",
                     "    cgps admin car report            view cars tracking report in realtime",
                     "    cgps admin order                 view all and update rent orders",
-                    "    cgps admin order pick-up         customer pick a car up",
-                    "    cgps admin order drop-off        customer drop a car off",
+                    "    cgps admin order search          search customer orders",
                 ]
             ),
         )
