@@ -34,7 +34,7 @@ CREATE TABLE driver_licenses (
 );
 
 CREATE TABLE tracking_devices (
-  no              TEXT PRIMARY KEY,
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
   gsm_provider    TEXT,
   gsm_no          TEXT,
   created_at      TEXT,
@@ -64,7 +64,8 @@ CREATE TABLE customers (
 );
 
 CREATE TABLE cars (
-  plate_license      TEXT PRIMARY KEY,
+  id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+  plate_license      TEXT,
   engine_number      TEXT,
   fuel_type          TEXT,
   make               TEXT,
@@ -80,10 +81,10 @@ CREATE TABLE cars (
   weekday_rate       NUMERIC,
   weekend_rate       NUMERIC,
   available          INTEGER,          
-  tracking_device_no TEXT,
+  tracking_device_id INTEGER,
   created_at         TEXT,
   updated_at         TEXT,
-  FOREIGN KEY (tracking_device_no) REFERENCES tracking_devices(no)
+  FOREIGN KEY (tracking_device_id) REFERENCES tracking_devices(id)
 );
 
 CREATE TABLE trackings (
@@ -97,18 +98,18 @@ CREATE TABLE trackings (
   engine_status       INTEGER,         
   gps_signal_level    REAL,
   gsm_signal_level    REAL,
-  car_plate_license   TEXT NOT NULL,
-  tracking_device_no  TEXT,
+  car_id              TEXT NOT NULL,
+  tracking_device_id  TEXT,
   created_at          TEXT,
   updated_at          TEXT,
-  FOREIGN KEY (car_plate_license)  REFERENCES cars(plate_license),
-  FOREIGN KEY (tracking_device_no) REFERENCES tracking_devices(no)
+  FOREIGN KEY (car_id)  REFERENCES cars(id),
+  FOREIGN KEY (tracking_device_id) REFERENCES tracking_devices(id)
 );
 
 CREATE TABLE orders (
   id                   INTEGER PRIMARY KEY AUTOINCREMENT,
   customer_id          INTEGER NOT NULL,
-  car_plate_license    TEXT NOT NULL,
+  car_id               TEXT NOT NULL,
   started_at           TEXT,
   ended_at             TEXT,
   receive_at           TEXT,
@@ -119,9 +120,10 @@ CREATE TABLE orders (
   total_amount         NUMERIC,
   created_at           TEXT,
   updated_at           TEXT,
-  deleted_at           TEXT,
+  rejected_at          TEXT,
+  approved_at          TEXT,
   FOREIGN KEY (customer_id)       REFERENCES customers(id),
-  FOREIGN KEY (car_plate_license) REFERENCES cars(plate_license)
+  FOREIGN KEY (car_id) REFERENCES cars(id)
 );
 
 CREATE TABLE invoices (

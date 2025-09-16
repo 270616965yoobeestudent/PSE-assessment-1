@@ -18,8 +18,8 @@ class Tracking(DBModel):
     engine_status: Optional[bool] = None
     gps_signal_level: Optional[float] = None
     gsm_signal_level: Optional[float] = None
-    car_plate_license: str = ""
-    tracking_device_no: Optional[str] = None
+    car_id: Optional[int] = None
+    tracking_device_id: Optional[int] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     _converters = {

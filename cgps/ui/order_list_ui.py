@@ -52,6 +52,7 @@ class _OrderListTableScren(Screen):
             "Duration (day)",
             "Car",
             "Total Price",
+            "Payment",
             "Status",
             "Issue date",
         )
@@ -65,7 +66,12 @@ class _OrderListTableScren(Screen):
             duration = days
             car = f"{item.order.car.make} {item.order.car.model}"
             total_price = f"${to_decimal(item.order.total_amount):.2f}"
-            status = "Paid" if item.paid_at else "Unpaid"
+            payment = "Paid" if item.paid_at else "Unpaid"
+            status = (
+                "Processing"
+                if item.order.approved_at is None and item.order.rejected_at is None
+                else "Approved" if item.order.approved_at else "Rejected"
+            )
             issue_date = item.created_at
             rows.append(
                 (
@@ -75,6 +81,7 @@ class _OrderListTableScren(Screen):
                     duration,
                     car,
                     total_price,
+                    payment,
                     status,
                     issue_date,
                 )
@@ -202,13 +209,30 @@ class _OrderListDetailScren(Screen):
             )
         if self._can_update:
             yield Label("\n")
-            yield Button("Delete", id="delete", compact=True, variant="error")
+            with Horizontal():
+                if self._data.order.approved_at is None:
+                    yield Button("Approve", id="approve", compact=True, variant="success")
+                    yield Label(" ")
+                if self._data.order.rejected_at is None:
+                    yield Button("Reject", id="reject", compact=True, variant="error")
+                    yield Label(" ")
+                if self._data.paid_at is None and self._data.order.rejected_at is None:
+                    yield Button("Already Paid", id="paid", compact=True)
+                    yield Label(" ")
 
     @on(Key)
     def _on_key(self, event: Key) -> None:
         if event.key == "escape" or event.key == "q":
             self.app.pop_screen()
 
-    @on(Button.Pressed, "#delete")
+    @on(Button.Pressed, "#reject")
     def _delete(self):
-        self.app.exit(self._data)
+        self.app.exit(("reject", self._data))
+
+    @on(Button.Pressed, "#approve")
+    def _approve(self):
+        self.app.exit(("approve", self._data))
+
+    @on(Button.Pressed, "#paid")
+    def _paid(self):
+        self.app.exit(("paid", self._data))

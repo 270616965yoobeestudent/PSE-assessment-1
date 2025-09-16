@@ -28,6 +28,18 @@ class CustomerService:
         customer.driver_license = license
         return customer
 
+    def list(self) -> list[Customer]:
+        data = self._database.fetchall("SELECT * FROM customers")
+        return [Customer.from_row(d) for d in data]
+    
+    def get_user_by_passport(self, passport_no: str) -> Customer:
+        customer_data = self._database.fetchone(
+            "SELECT * FROM customers WHERE passport_no = ?", (passport_no,)
+        )
+        if customer_data is None:
+            return None
+        return Customer.from_row(customer_data)
+
     def update_info(self, customer: Customer) -> Customer:
         now = datetime.now().strftime(ISO_DT)
 

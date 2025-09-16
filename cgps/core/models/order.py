@@ -13,7 +13,7 @@ from cgps.core.utils import to_decimal, to_dt
 class Order(DBModel):
     id: int
     customer_id: int
-    car_plate_license: str
+    car_id: int
     started_at: Optional[datetime] = None
     ended_at: Optional[datetime] = None
     receive_at: Optional[datetime] = None
@@ -24,7 +24,8 @@ class Order(DBModel):
     total_amount: Optional[Decimal] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-    deleted_at: Optional[datetime] = None
+    rejected_at: Optional[datetime] = None
+    approved_at: Optional[datetime] = None
     customer: Optional["Customer"] = None
     car: Optional["Car"] = None
     _converters = {

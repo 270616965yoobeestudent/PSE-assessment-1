@@ -45,6 +45,9 @@ class AdminCli(UserCli):
         logout = cmd.add_parser("logout", help="logout from system")
         logout.set_defaults(func=lambda _: self._logout())
 
+        customer = cmd.add_parser("customer", help="view all and update customers")
+        customer.set_defaults(func=lambda _: self._customer_list())
+
         gps = cmd.add_parser("gps", help="view all and update gps devices")
         gps.set_defaults(func=lambda _: self._gps_list())
         gps_cmd = gps.add_subparsers(dest="cmd", title="Usage", metavar="gps <command>")
@@ -56,10 +59,6 @@ class AdminCli(UserCli):
         car_cmd = car.add_subparsers(dest="cmd", title="Usage", metavar="car <command>")
         car_register = car_cmd.add_parser("register", help="register a new car")
         car_register.set_defaults(func=lambda _: self._car_register())
-        car_update = car_cmd.add_parser("pick-up", help="customer pick a car up")
-        car_update.set_defaults(func=lambda _: self._car_pick_up())
-        car_return = car_cmd.add_parser("drop-off", help="customer drop a car off")
-        car_return.set_defaults(func=lambda _: self._car_drop_off())
         car_report = car_cmd.add_parser(
             "report", help="view cars tracking report in realtime"
         )
@@ -67,6 +66,15 @@ class AdminCli(UserCli):
 
         order = cmd.add_parser("order", help="view all and update rent orders")
         order.set_defaults(func=lambda _: self._order_list())
+        order_cmd = order.add_subparsers(dest="cmd", title="Usage", metavar="order <command>")
+        order_pick_up = order_cmd.add_parser("pick-up", help="customer pick a car up")
+        order_pick_up.set_defaults(func=lambda _: self._order_pick_up())
+        order_drop_off = order_cmd.add_parser("drop-off", help="customer drop a car off")
+        order_drop_off.set_defaults(func=lambda _: self._order_drop_off())
+
+    @logged_in()
+    def _customer_list(self, user_id: int):
+        pass
 
     @logged_in()
     def _gps_list(self, user_id: int):
@@ -98,27 +106,45 @@ class AdminCli(UserCli):
         pass
 
     @logged_in()
-    def _car_pick_up(self, user_id: int):
-        pass
-
-    @logged_in()
-    def _car_drop_off(self, user_id: int):
-        pass
-
-    @logged_in()
     def _car_report(self, user_id: int):
+        pass
+
+    @logged_in()
+    def _order_pick_up(self, user_id: int):
+        pass
+
+    @logged_in()
+    def _order_drop_off(self, user_id: int):
         pass
 
     @logged_in()
     def _order_list(self, user_id: int):
         invoices = self._order_service.list()
-        data = self._order_list_ui.with_data(invoices, can_update=True).run()
-        if data is None:
+        result = self._order_list_ui.with_data(invoices, can_update=True).run()
+        if result is None:
             return
-        confirm = questionary.path("Are you sure to delete this order? (y/N)").ask()
-        if confirm != "y":
-            return
-        if not self._order_service.soft_delete(data.order.id):
-            print("Delete order failed")
-            return
-        print("Delete order successful")
+        (action, data) = result
+        if (action == 'reject'):
+            confirm = questionary.path("Are you sure to reject this order? (y/N)").ask()
+            if confirm != "y":
+                return
+            if not self._order_service.reject(data.order.id):
+                print("Reject order failed")
+                return
+            print("Reject order successful")
+        if (action == 'approve'):
+            confirm = questionary.path("Are you sure to approve this order? (y/N)").ask()
+            if confirm != "y":
+                return
+            if not self._order_service.approve(data.order.id):
+                print("Approve order failed")
+                return
+            print("Approve order successful")
+        if (action == 'paid'):
+            confirm = questionary.path("Are you sure to make payment for this order? (y/N)").ask()
+            if confirm != "y":
+                return
+            if not self._order_service.paid(data.id):
+                print("Payment failed")
+                return
+            print("Payment successful")

@@ -11,6 +11,7 @@ from cgps.core.utils import to_bool, to_date, to_decimal, to_dt
 
 @dataclass
 class Car(DBModel):
+    id: int
     plate_license: str
     engine_number: Optional[str] = None
     fuel_type: Optional[str] = None
@@ -27,7 +28,7 @@ class Car(DBModel):
     weekday_rate: Optional[Decimal] = None
     weekend_rate: Optional[Decimal] = None
     available: Optional[bool] = None
-    tracking_device_no: Optional[str] = None
+    tracking_device_id: Optional[int] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     tracking_device: Optional["TrackingDevice"] = None

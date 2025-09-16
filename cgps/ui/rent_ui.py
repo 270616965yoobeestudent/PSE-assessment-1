@@ -242,7 +242,10 @@ class _RentSummaryScreen(Screen):
             classes="header",
         )
         yield Label("\n")
-        yield Button("Pay", id="pay", compact=True)
+        with Horizontal():
+            yield Button("Pay now", id="pay", compact=True, variant="success")
+            yield Label(" ")
+            yield Button("Pay on Arrive", id="pay-later", compact=True)
 
     @on(Key)
     def _on_key(self, event: Key) -> None:
@@ -251,15 +254,23 @@ class _RentSummaryScreen(Screen):
 
     @on(Button.Pressed, "#pay")
     def _pay(self):
+        self._generate_invoide(paid=True)
+
+    @on(Button.Pressed, "#pay-later")
+    def _pay_later(self):
+        self._generate_invoide(paid=False)
+
+    def _generate_invoide(self, paid: bool):
         invoice = Invoice(
             id=0,
             order_id=0,
             amount=self._metadata["price"],
             paid_amount=self._metadata["price"],
+            paid_at=datetime.now() if paid else None,
             order=Order(
                 id=0,
                 customer_id=0,
-                car_plate_license=self._car.plate_license,
+                car_id=self._car.id,
                 started_at=self._metadata["started_at"],
                 ended_at=self._metadata["ended_at"],
                 total_day=self._metadata["days"],

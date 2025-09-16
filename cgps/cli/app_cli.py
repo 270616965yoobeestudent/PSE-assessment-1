@@ -40,14 +40,15 @@ class AppCli:
                     "    cgps admin <command>             all admin commands require admin authentication",
                     "    cgps admin login                 login as admin",
                     "    cgps admin logout                logout from system",
+                    "    cgps admin customer              view all and update customers",
                     "    cgps admin gps                   view all and update gps devices",
                     "    cgps admin gps register          register a new gps device",
                     "    cgps admin car                   view all and update cars",
                     "    cgps admin car register          register a new car",
-                    "    cgps admin car pick-up           customer pick a car up",
-                    "    cgps admin car drop-off          customer drop a car off",
                     "    cgps admin car report            view cars tracking report in realtime",
                     "    cgps admin order                 view all and update rent orders",
+                    "    cgps admin order pick-up         customer pick a car up",
+                    "    cgps admin order drop-off        customer drop a car off",
                 ]
             ),
         )

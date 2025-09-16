@@ -8,7 +8,7 @@ from cgps.core.utils import to_dt
 
 @dataclass
 class TrackingDevice(DBModel):
-    no: str
+    id: int
     gsm_provider: Optional[str] = None
     gsm_no: Optional[str] = None
     created_at: Optional[datetime] = None

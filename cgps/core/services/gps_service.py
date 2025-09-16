@@ -44,7 +44,7 @@ class GpsService:
         device_data = only_keys(
             device_data,
             [
-                "no",
+                "id",
                 "gsm_provider",
                 "gsm_no",
                 "updated_at",
@@ -52,7 +52,7 @@ class GpsService:
         )
         device_data.update(updated_at=now)
         device_sql = (
-            f"UPDATE tracking_devices SET {to_update_column(device_data)} WHERE no=:no"
+            f"UPDATE tracking_devices SET {to_update_column(device_data)} WHERE id=:id"
         )
         self._database.begin()
         self._database.execute(device_sql, device_data)

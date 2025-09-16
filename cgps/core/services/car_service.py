@@ -16,11 +16,12 @@ class CarService:
             SELECT *
             FROM cars
             WHERE available = 1
-            AND plate_license NOT IN (
-                SELECT car_plate_license
+            AND id NOT IN (
+                SELECT car_id
                 FROM orders
                 WHERE ended_at > :started_at
                 AND started_at < :ended_at
+                AND rejected_at IS NULL
             )
             AND minimum_rent <= :days
             AND maximum_rent >= :days
@@ -55,7 +56,7 @@ class CarService:
                 "weekday_rate",
                 "weekend_rate",
                 "available",
-                "tracking_device_no",
+                "tracking_device_id",
                 "created_at",
                 "updated_at",
                 "mileage",

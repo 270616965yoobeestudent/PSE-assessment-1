@@ -42,12 +42,12 @@ class _GpsListTableScren(Screen):
         )
         rows = []
         for item in self._data:
-            no = item.no
+            id = item.id
             gsm_provider = item.gsm_provider
             gsm_no = item.gsm_no
             rows.append(
                 (
-                    no,
+                    id,
                     gsm_provider,
                     gsm_no,
                 )
