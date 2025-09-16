@@ -7,6 +7,8 @@ from cgps.core.services.admin_auth_service import AdminAuthService
 from cgps.core.services.car_service import CarService
 from cgps.core.services.gps_service import GpsService
 from cgps.core.services.order_service import OrderService
+from cgps.core.services.tracking_service import TrackingService
+from cgps.ui.tracking_report_ui import TrackingReportUi
 from cgps.ui.car_list_ui import CarListUi
 from cgps.ui.customer_search_ui import CustomerSearchUi
 from cgps.ui.gps_list_ui import GpsListUi
@@ -28,16 +30,20 @@ class AdminCli(UserCli):
         order_service: OrderService,
         car_service: CarService,
         gps_service: GpsService,
+        tracking_service: TrackingService,
+        tracking_report_ui: TrackingReportUi,
     ):
         super().__init__(auth_service, login_ui)
         self._order_service = order_service
         self._car_service = car_service
         self._gps_service = gps_service
+        self._tracking_service = tracking_service
         self._order_list_ui = order_list_ui
         self._gps_list_ui = gps_list_ui
         self._gps_register_ui = gps_register_ui
         self._customer_search_ui = customer_search_ui
         self._car_list_ui = car_list_ui
+        self._tracking_report_ui = tracking_report_ui
 
     def run(self, role: _SubParsersAction):
         admin: ArgumentParser = role.add_parser("admin", help="admin commands")
@@ -114,9 +120,13 @@ class AdminCli(UserCli):
             if not self._car_service.update(car):
                 print("Update car failed")
                 return
+            print("Update car successful")
         if action == "report":
-            pass
-        print("Update car successful")
+            rows = self._tracking_service.list_with_car(car_id=car.id)
+            self._tracking_report_ui.with_data(rows).with_stream(
+                cars=[car],
+                interval_sec=3.0,
+            ).run()
 
     @logged_in()
     def _car_register(self, user_id: int):
@@ -133,7 +143,12 @@ class AdminCli(UserCli):
 
     @logged_in()
     def _car_report(self, user_id: int):
-        pass
+        initial = self._tracking_service.list_with_car()
+        cars = self._car_service.all()
+        self._tracking_report_ui.with_data(initial).with_stream(
+            cars=cars,
+            interval_sec=3.0,
+        ).run()
 
     @logged_in()
     def _order_search(self, user_id: int):

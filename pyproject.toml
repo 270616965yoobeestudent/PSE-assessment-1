@@ -15,9 +15,8 @@ dynamic = ["dependencies"]
 dependencies = { file = ["requirements.txt"] }
 
 [tool.setuptools.packages.find]
-include = ["cgps*", "mock_gps*"]
+include = ["cgps*"]
 
 [project.scripts]
 cgps = "cgps.__main__:main"
 cgps-db = "cgps.__db__:main"
-mock-gps = "mock_gps.__main__:main"

@@ -10,6 +10,7 @@ from cgps.core.services.car_service import CarService
 from cgps.core.services.customer_service import CustomerService
 from cgps.core.services.gps_service import GpsService
 from cgps.core.services.order_service import OrderService
+from cgps.core.services.tracking_service import TrackingService
 from cgps.ui.car_list_ui import CarListUi
 from cgps.ui.customer_search_ui import CustomerSearchUi
 from cgps.ui.gps_list_ui import GpsListUi
@@ -19,6 +20,7 @@ from cgps.ui.register_ui import RegisterUi
 from cgps.ui.login_ui import LoginUi
 from cgps.ui.order_list_ui import OrderListUi
 from cgps.ui.rent_ui import RentUi
+from cgps.ui.tracking_report_ui import TrackingReportUi
 
 
 class Container(containers.DeclarativeContainer):
@@ -60,6 +62,10 @@ class Container(containers.DeclarativeContainer):
         GpsService,
         database=database,
     )
+    tracking_service = providers.Factory(
+        TrackingService,
+        database=database,
+    )
 
     # UI Factory
     login_ui = providers.Factory(LoginUi)
@@ -69,6 +75,7 @@ class Container(containers.DeclarativeContainer):
     rent_ui = providers.Factory(RentUi, car_service=car_service)
     gps_list_ui = providers.Factory(GpsListUi)
     gps_register_ui = providers.Factory(GpsRegisterUi)
+    tracking_report_ui = providers.Factory(TrackingReportUi, tracking_service=tracking_service)
     customer_search_ui = providers.Factory(
         CustomerSearchUi, customer_service=customer_service
     )
@@ -90,6 +97,8 @@ class Container(containers.DeclarativeContainer):
         order_service=order_service,
         car_service=car_service,
         gps_service=gps_service,
+        tracking_service=tracking_service,
+        tracking_report_ui=tracking_report_ui,
     )
     customer_cli = providers.Factory(
         CustomerCli,
